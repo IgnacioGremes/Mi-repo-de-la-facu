@@ -68,21 +68,28 @@ from typing import List, Dict, Set, Optional, Any
 #     return visited
 
 def find_WCC(graph: Graph) -> List[Set[str]]:
-    def iterative_dfs(start_vertex: str, visited: Set[str]) -> Set[str]:
+    def iterative_dfs(start_vertex: str, visited: Set[str],components) -> Set[str]:
         stack = [start_vertex]
         component = set()
         while stack:
             vertex = stack.pop()
             if vertex not in visited:
-                visited.add(vertex)
+                visited.add(vertex) 
                 component.add(vertex)
                 # Add neighbors in reverse order to visit them in correct order
                 # neighbors = graph.get_neighbors(vertex)
                 # for neighbor in reversed(neighbors):
                 #     stack.append(neighbor)
-                for neighbor in reversed(graph.get_neighbors(vertex)):
-                    # if neighbor not in visited:
+                for neighbor in graph.get_neighbors(vertex):
+                    if neighbor not in visited:
                         stack.append(neighbor)
+                    else:
+                        for i in range(len(components)):
+                            if neighbor in components[i]:
+                                components[i] = components[i].union(component)
+                                return
+                                
+                            
 
                 # stack.extend(graph.get_neighbors(vertex))
 
@@ -93,16 +100,17 @@ def find_WCC(graph: Graph) -> List[Set[str]]:
     
     for vertex in graph._graph:
         if vertex not in visited:
-            print(f"Doing DFS{vertex}")
-            component = iterative_dfs(vertex, visited)
-            components.append(component)
+            # print(f"Doing DFS{vertex}")
+            component = iterative_dfs(vertex, visited,components)
+            if component != None:
+                components.append(component)
     
     return components
 
 page_graph = Graph()
 #/home/ig/Desktop/Repositorios Git/Mi Repositorio/Mi-repo-de-la-facu/TP4_Algoritmos/web-Google.txt
 #'C:/Users/iegre/OneDrive/Escritorio/repositorio Git/Mi Repositorio/Mi-repo-de-la-facu/TP4_Algoritmos/web-Google.txt'
-with open('/home/ig/Desktop/Repositorios Git/Mi Repositorio/Mi-repo-de-la-facu/TP4_Algoritmos/web-Google.txt', 'r') as file:
+with open('C:/Users/iegre/OneDrive/Escritorio/repositorio Git/Mi Repositorio/Mi-repo-de-la-facu/TP4_Algoritmos/web-Google.txt', 'r') as file:
     for l in file:
         if "# FromNodeId	ToNodeId" in l:
             break

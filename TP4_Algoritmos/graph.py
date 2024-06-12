@@ -15,7 +15,7 @@ class Graph:
         :param data: data associated with the vertex
         """
         if vertex not in self._graph:
-            self._graph[vertex] = {'data': data, 'neighbors': {}}
+            self._graph[vertex] = {'data': data, 'neighbors': {},'component_id': -1}
 
     def add_edge(self, vertex1: str, vertex2: str, data: Optional[Any]=None) -> None:
         """
