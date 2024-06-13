@@ -83,15 +83,15 @@ def find_WCC(graph: Graph) -> List[Set[str]]:
                 for neighbor in graph.get_neighbors(vertex):
                     if neighbor not in visited:
                         stack.append(neighbor)
-                    else:
-                        for i in range(len(components)):
-                            if neighbor in components[i]:
-                                components[i] = components[i].union(component)
-                                return
+                #     else:
+                #         for i in range(len(components)):
+                #             if neighbor in components[i]:
+                #                 components[i] = components[i].union(component)
+                #                 return
                                 
                             
 
-                # stack.extend(graph.get_neighbors(vertex))
+                stack.extend(graph.get_neighbors(vertex))
 
         return component
 
@@ -102,8 +102,8 @@ def find_WCC(graph: Graph) -> List[Set[str]]:
         if vertex not in visited:
             # print(f"Doing DFS{vertex}")
             component = iterative_dfs(vertex, visited,components)
-            if component != None:
-                components.append(component)
+            components.append(component)
+            # if component != None:
     
     return components
 
@@ -123,6 +123,7 @@ with open('C:/Users/iegre/OneDrive/Escritorio/repositorio Git/Mi Repositorio/Mi-
             if not page_graph.vertex_exists(v):
                 page_graph.add_vertex(str(v))
         page_graph.add_edge(str(edge[0]), str(edge[1]))
+        page_graph.add_edge(str(edge[1]), str(edge[0]))
 
 wccs = find_WCC(page_graph)
 
