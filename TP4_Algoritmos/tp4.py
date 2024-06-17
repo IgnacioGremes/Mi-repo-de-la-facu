@@ -7,7 +7,7 @@ import random
 
 #/home/ig/Desktop/Repositorios Git/Mi Repositorio/Mi-repo-de-la-facu/TP4_Algoritmos/web-Google.txt
 #'C:/Users/iegre/OneDrive/Escritorio/repositorio Git/Mi Repositorio/Mi-repo-de-la-facu/TP4_Algoritmos/web-Google.txt'
-def createGraph(directional, transposed):
+def createGraph(directional):
     page_graph = Graph()
     with open('C:/Users/iegre/OneDrive/Escritorio/repositorio Git/Mi Repositorio/Mi-repo-de-la-facu/TP4_Algoritmos/web-Google.txt', 'r') as file:
         for l in file:
@@ -25,16 +25,13 @@ def createGraph(directional, transposed):
             if(not directional):
                 page_graph.add_edge(str(edge[0]), str(edge[1]))
                 page_graph.add_edge(str(edge[1]), str(edge[0]))
-            elif(transposed):
-                page_graph.add_edge(str(edge[1]), str(edge[0]))
             else:
                 page_graph.add_edge(str(edge[0]), str(edge[1]))
 
     return page_graph
 
-# transposedGraph = createGraph(True,True)
-directedGraph = createGraph(True,False)
-nonDirectedGraph = createGraph(False,False)
+directedGraph = createGraph(directional=True)
+nonDirectedGraph = createGraph(directional=False)
 
 # def kosaraju_iterative(graph:Graph):    #Funciona
 #     stack = []
@@ -121,42 +118,6 @@ print(f"Total amount of SCC:{len(wccs)}")
 
 # 3) cantidad de triangulos
 
-# def calcularTraingulos(graph:Graph,transposedGraph:Graph):
-#     for vertex in graph._graph:
-#         for neighbor in graph.get_neighbors(vertex):
-#             if vertex < neighbor:
-
-
-
-# def intersection(set1: Set[str], set2: Set[str]) -> Set[str]:
-#     return set1 & set2  # Using set intersection
-# def intersection(lst1, lst2):
-#     lst3 = [value for value in lst1 if value in lst2]
-#     return lst3
-
-
-# def count_cycle_triangles(G: Graph, GT: Graph) -> Tuple[int, List[Tuple[str, str, str]]]:
-#     # V = list(G._graph.keys())
-#     # N_plus = {v: set(G.get_neighbors(v)) for v in V}
-#     # N_minus = {v: set(GT.get_neighbors(v)) for v in V}
-
-# # N-(u,G) = N+ (u,GT)
-
-#     c = 0  # Initialize cycle triangle count
-#     triangles = []  # Optional: list of cycle triangles
-
-#     for u in G._graph:
-#         for v in G.get_neighbors(u):
-#             # if u < v:
-#             S = intersection (G.get_neighbors(v), GT.get_neighbors(u))
-#             # S = intersection(N_minus[u], N_plus[v])
-#             for w in S:
-#                 # if u < w:
-#                 triangles.append((u, v, w))  # For listing
-#                 c += 1
-
-#     return c, triangles
-
 def find_cycle_triangles(graph:Graph) -> List[Tuple[str, str, str]]:
     cycle_triangles = []
     for v1 in graph._graph:
@@ -165,9 +126,6 @@ def find_cycle_triangles(graph:Graph) -> List[Tuple[str, str, str]]:
                 if v1 in graph.get_neighbors(v3):
                     cycle_triangles.append((v1, v2, v3))
     return cycle_triangles
-
-
-# cantidadTriangulos, triangulos = count_cycle_triangles(directedGraph,transposedGraph)
 
 #--------------------------------------------
 # cantidadTriangulos20 = find_cycle_triangles(directedGraph)
@@ -232,37 +190,10 @@ maxDistances = []
 
 # 5)
 
-# def pageRank(graph:Graph,n):
-#     appearances = {vertex:0 for vertex in graph._graph}
-#     for _ in range(n):
-#         starting_vertex = random.choice(list(directedGraph._graph.items()))
-#         visited = set()
-#         algo = iterative_dfs(graph,starting_vertex[0],visited)
-#         for vertex in visited:
-#             appearances[vertex] += 1
-#     return appearances
-
-# totalAppeareances = pageRank(directedGraph,50)
-# temp = sorted(totalAppeareances.values())
-# print(temp)
-# res = []
-# for i in range(1,6):
-#     for key in totalAppeareances :
-#         if totalAppeareances[key] == temp[-i]:
-#             print(f"This node {key} appeared {temp[-i]} times")
-
-
 def random_walk(graph:Graph, start_vertex: str, steps: int) -> Dict[str, int]:
-    """
-    Performs a random walk starting from a given vertex for a specified number of steps.
-    :param start_vertex: the vertex to start the walk from
-    :param steps: number of steps in the random walk
-    :return: a dictionary where keys are vertices and values are the counts of visits
-    """
     if not graph.vertex_exists(start_vertex):
         raise ValueError("The start vertex does not exist")
 
-    # visit_count = defaultdict(int)
     visit_count = {}
     current_vertex = start_vertex
     visit_count[current_vertex] = 1
@@ -270,14 +201,13 @@ def random_walk(graph:Graph, start_vertex: str, steps: int) -> Dict[str, int]:
     for _ in range(steps):
         neighbors = graph.get_neighbors(current_vertex)
         if not neighbors:
-            break  # No more neighbors to walk to
+            break 
         current_vertex = random.choice(neighbors)
         if current_vertex  in visit_count:
             visit_count[current_vertex] += 1
         else:
             visit_count[current_vertex] = 1
 
-    # return dict(visit_count)
     return visit_count
 
 steps = 100
@@ -291,9 +221,6 @@ for _ in range(steps):
         else:
             finalResult[item] = result[item]
         
-
-
-# print("Page Rank result:", finalResult)
 noRepeatsResultValues = []
 for value in finalResult.values():
     if value not in noRepeatsResultValues:
@@ -305,7 +232,6 @@ for i in range(1,6):
         if finalResult[key] == orderedValues[-i]:
             print(f"This node {key} appeared {orderedValues[-i]} times")
 
-# print(finalResult)
-# res = [key for key in totalAppeareances if totalAppeareances[key] == temp]
+
 
     
