@@ -1,6 +1,6 @@
 from graph import Graph
 from typing import List, Dict, Set, Optional, Any,Tuple
-from collections import deque
+from collections import deque,defaultdict
 import time
 import random
 
@@ -83,17 +83,18 @@ nonDirectedGraph = createGraph(False,False)
 
 #     return scc_components
 
+def iterative_dfs(graph:Graph,start_vertex: str, visited: Set[str],) -> Set[str]:
+    stack = [start_vertex]
+    component = set()
+    while stack:
+        vertex = stack.pop()
+        if vertex not in visited:
+            visited.add(vertex) 
+            component.add(vertex)
+            stack.extend(graph.get_neighbors(vertex))                                
+    return component
+
 def find_WCC(graph: Graph) -> List[Set[str]]:
-    def iterative_dfs(start_vertex: str, visited: Set[str],components) -> Set[str]:
-        stack = [start_vertex]
-        component = set()
-        while stack:
-            vertex = stack.pop()
-            if vertex not in visited:
-                visited.add(vertex) 
-                component.add(vertex)
-                stack.extend(graph.get_neighbors(vertex))                                
-        return component
 
     visited = set()
     components = []
@@ -101,7 +102,7 @@ def find_WCC(graph: Graph) -> List[Set[str]]:
     for vertex in graph._graph:
         if vertex not in visited:
             # print(f"Doing DFS{vertex}")
-            component = iterative_dfs(vertex, visited,components)
+            component = iterative_dfs(graph,vertex, visited)
             components.append(component)
             # if component != None:
     
@@ -165,37 +166,15 @@ def find_cycle_triangles(graph:Graph) -> List[Tuple[str, str, str]]:
                     cycle_triangles.append((v1, v2, v3))
     return cycle_triangles
 
-# def find_cycle_triangles(graph:Graph) -> List[Tuple[str, str, str]]:
-#     """
-#     Finds all cycle triangles in the graph using an adjacency matrix.
-#     :return: List of tuples, each containing three vertices that form a triangle
-#     """
-#     vertices = list(graph._graph.keys())
-#     n = len(vertices)
-#     vertex_index = {vertices[i]: i for i in range(n)}
-
-#     # Create the adjacency matrix
-#     adj_matrix = [[0] * n for _ in range(n)]
-#     for vertex in vertices:
-#         for neighbor in graph.get_neighbors(vertex):
-#             adj_matrix[vertex_index[vertex]][vertex_index[neighbor]] = 1
-
-#     triangles = []
-#     for i in range(n):
-#         for j in range(i + 1, n):
-#             if adj_matrix[i][j]:
-#                 for k in range(j + 1, n):
-#                     if adj_matrix[i][k] and adj_matrix[j][k]:
-#                         triangles.append((vertices[i], vertices[j], vertices[k]))
-
-#     return triangles
 
 # cantidadTriangulos, triangulos = count_cycle_triangles(directedGraph,transposedGraph)
-cantidadTriangulos20 = find_cycle_triangles(directedGraph)
+
+#--------------------------------------------
+# cantidadTriangulos20 = find_cycle_triangles(directedGraph)
 
 
 
-print(f"La cantidad de triagulos son:{len(cantidadTriangulos20)/3}")
+# print(f"La cantidad de triagulos son:{len(cantidadTriangulos20)/3}")
 
 # 3)
 
@@ -203,7 +182,8 @@ def bfs_shortest_paths(graph:Graph, start_vertex: str):
     # if start_vertex not in graph._graph:
     #     raise ValueError("The start vertex does not exist")
 
-    distances = {vertex: float('inf') for vertex in graph._graph}
+    #float('inf')
+    distances = {vertex:-1 for vertex in graph._graph}
     distances[start_vertex] = 0
 
     queue = deque([start_vertex])
@@ -213,7 +193,7 @@ def bfs_shortest_paths(graph:Graph, start_vertex: str):
         current_distance = distances[current_vertex]
 
         for neighbor in graph.get_neighbors(current_vertex):
-            if distances[neighbor] == float('inf'):  # not visited yet
+            if distances[neighbor] == -1: #float('inf'):  # not visited yet
                 distances[neighbor] = current_distance + 1
                 queue.append(neighbor)
 
@@ -233,15 +213,99 @@ def bfs_shortest_paths_with_time(graph:Graph, start_vertex: str):
 
 times =[]
 allDistances = []
+maxDistances = []
 
-for _ in range(100):
+# for _ in range(100):
+#     starting_vertex = random.choice(list(directedGraph._graph.items()))
+#     distances , elapsed_time = bfs_shortest_paths_with_time(directedGraph,starting_vertex[0]) 
+#     times.append(elapsed_time)
+#     allDistances.append(distances)
+#     maxDistances.append(max(distances.values()))
+
+# print(f"Time taken to find shortest path of 100 nodes: {sum(times)}")
+# print(f"Aproximate time taken to find shortest path of 1 node: {sum(times)/100}")
+# print(f"Aproximate time taken to find shortest path of all nodes: {sum(times)/100 * 875713}")
+# print(f"Aproximate time taken in hours to find shortest path of all nodes: {sum(times)/100 * 875713 /60/60}")
+
+# # 4) 
+# print(f"The diameter of the graph is aproximatly: {max(maxDistances)}")
+
+# 5)
+
+# def pageRank(graph:Graph,n):
+#     appearances = {vertex:0 for vertex in graph._graph}
+#     for _ in range(n):
+#         starting_vertex = random.choice(list(directedGraph._graph.items()))
+#         visited = set()
+#         algo = iterative_dfs(graph,starting_vertex[0],visited)
+#         for vertex in visited:
+#             appearances[vertex] += 1
+#     return appearances
+
+# totalAppeareances = pageRank(directedGraph,50)
+# temp = sorted(totalAppeareances.values())
+# print(temp)
+# res = []
+# for i in range(1,6):
+#     for key in totalAppeareances :
+#         if totalAppeareances[key] == temp[-i]:
+#             print(f"This node {key} appeared {temp[-i]} times")
+
+
+def random_walk(graph:Graph, start_vertex: str, steps: int) -> Dict[str, int]:
+    """
+    Performs a random walk starting from a given vertex for a specified number of steps.
+    :param start_vertex: the vertex to start the walk from
+    :param steps: number of steps in the random walk
+    :return: a dictionary where keys are vertices and values are the counts of visits
+    """
+    if not graph.vertex_exists(start_vertex):
+        raise ValueError("The start vertex does not exist")
+
+    # visit_count = defaultdict(int)
+    visit_count = {}
+    current_vertex = start_vertex
+    visit_count[current_vertex] = 1
+
+    for _ in range(steps):
+        neighbors = graph.get_neighbors(current_vertex)
+        if not neighbors:
+            break  # No more neighbors to walk to
+        current_vertex = random.choice(neighbors)
+        if current_vertex  in visit_count:
+            visit_count[current_vertex] += 1
+        else:
+            visit_count[current_vertex] = 1
+
+    # return dict(visit_count)
+    return visit_count
+
+steps = 100
+finalResult = {}
+for _ in range(steps):
     starting_vertex = random.choice(list(directedGraph._graph.items()))
-    distances , elapsed_time = bfs_shortest_paths_with_time(directedGraph,starting_vertex[0]) 
-    times.append(elapsed_time)
-    allDistances.append(distances)
+    result = random_walk(directedGraph,starting_vertex[0], steps)
+    for item in result:
+        if item in finalResult:
+            finalResult[item] += result[item]
+        else:
+            finalResult[item] = result[item]
+        
 
-print(f"Time taken to find shortest path of 100 nodes: {sum(times)}")
-print(f"Aproximate time taken to find shortest path of 1 node: {sum(times)/100}")
-print(f"Aproximate time taken to find shortest path of all nodes: {sum(times)/100 * 875713}")
-print(f"Aproximate time taken in hours to find shortest path of all nodes: {sum(times)/100 * 875713 /60/60}")
 
+# print("Page Rank result:", finalResult)
+noRepeatsResultValues = []
+for value in finalResult.values():
+    if value not in noRepeatsResultValues:
+        noRepeatsResultValues.append(value)
+orderedValues = sorted(noRepeatsResultValues)
+res = []
+for i in range(1,6):
+    for key in finalResult :
+        if finalResult[key] == orderedValues[-i]:
+            print(f"This node {key} appeared {orderedValues[-i]} times")
+
+# print(finalResult)
+# res = [key for key in totalAppeareances if totalAppeareances[key] == temp]
+
+    
