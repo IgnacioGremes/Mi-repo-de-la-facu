@@ -190,48 +190,190 @@ maxDistances = []
 
 # 5)
 
-def random_walk(graph:Graph, start_vertex: str, steps: int) -> Dict[str, int]:
-    if not graph.vertex_exists(start_vertex):
-        raise ValueError("The start vertex does not exist")
+# def random_walk(graph:Graph, start_vertex: str, steps: int) -> Dict[str, int]:
+#     if not graph.vertex_exists(start_vertex):
+#         raise ValueError("The start vertex does not exist")
 
-    visit_count = {}
-    current_vertex = start_vertex
-    visit_count[current_vertex] = 1
+#     visit_count = {}
+#     current_vertex = start_vertex
+#     visit_count[current_vertex] = 1
 
-    for _ in range(steps):
-        neighbors = graph.get_neighbors(current_vertex)
-        if not neighbors:
-            break 
-        current_vertex = random.choice(neighbors)
-        if current_vertex  in visit_count:
-            visit_count[current_vertex] += 1
-        else:
-            visit_count[current_vertex] = 1
+#     for _ in range(steps):
+#         neighbors = graph.get_neighbors(current_vertex)
+#         if not neighbors:
+#             break 
+#         current_vertex = random.choice(neighbors)
+#         if current_vertex  in visit_count:
+#             visit_count[current_vertex] += 1
+#         else:
+#             visit_count[current_vertex] = 1
 
-    return visit_count
+#     return visit_count
 
-steps = 100
-finalResult = {}
-for _ in range(steps):
-    starting_vertex = random.choice(list(directedGraph._graph.items()))
-    result = random_walk(directedGraph,starting_vertex[0], steps)
-    for item in result:
-        if item in finalResult:
-            finalResult[item] += result[item]
-        else:
-            finalResult[item] = result[item]
+# steps = 100
+# finalResult = {}
+# for _ in range(steps):
+#     starting_vertex = random.choice(list(directedGraph._graph.items()))
+#     result = random_walk(directedGraph,starting_vertex[0], steps)
+#     for item in result:
+#         if item in finalResult:
+#             finalResult[item] += result[item]
+#         else:
+#             finalResult[item] = result[item]
         
-noRepeatsResultValues = []
-for value in finalResult.values():
-    if value not in noRepeatsResultValues:
-        noRepeatsResultValues.append(value)
-orderedValues = sorted(noRepeatsResultValues)
-res = []
-for i in range(1,6):
-    for key in finalResult :
-        if finalResult[key] == orderedValues[-i]:
-            print(f"This node {key} appeared {orderedValues[-i]} times")
+# noRepeatsResultValues = []
+# for value in finalResult.values():
+#     if value not in noRepeatsResultValues:
+#         noRepeatsResultValues.append(value)
+# orderedValues = sorted(noRepeatsResultValues)
+# res = []
+# for i in range(1,6):
+#     for key in finalResult :
+#         if finalResult[key] == orderedValues[-i]:
+#             print(f"This node {key} appeared {orderedValues[-i]} times")
+
+# 6) 
+
+def find_cycles(graph: Graph) -> List[List[str]]:
+    index = 0
+    stack = []
+    index_map = {}
+    lowlink_map = {}
+    on_stack = {}
+    cycles = []
+    call_stack = []
+
+    for vertex in graph._graph.keys():
+        if vertex not in index_map:
+            call_stack.append((vertex, 'entry'))
+
+            while call_stack:
+                current, stage = call_stack.pop()
+
+                if stage == 'entry':
+                    index_map[current] = index
+                    lowlink_map[current] = index
+                    index += 1
+                    stack.append(current)
+                    on_stack[current] = True
+
+                    call_stack.append((current, 'exit'))
+                    for neighbor in graph.get_neighbors(current):
+                        if neighbor not in index_map:
+                            call_stack.append((neighbor, 'entry'))
+                        elif on_stack.get(neighbor, False):
+                            lowlink_map[current] = min(lowlink_map[current], index_map[neighbor])
+
+                elif stage == 'exit':
+                    for neighbor in graph.get_neighbors(current):
+                        if neighbor in index_map and on_stack.get(neighbor, False):
+                            lowlink_map[current] = min(lowlink_map[current], lowlink_map[neighbor])
+
+                    if lowlink_map[current] == index_map[current]:
+                        cycle = []
+                        while True:
+                            w = stack.pop()
+                            on_stack[w] = False
+                            cycle.append(w)
+                            if w == current:
+                                break
+                        if len(cycle) > 1 or (len(cycle) == 1 and current in graph.get_neighbors(current)):
+                            cycles.append(cycle)
+
+    return cycles
+
+# def find_cycles(graph:Graph) -> List[List[str]]:
+#     visited = set()
+#     stack = []
+#     parent_map: Dict[str, str] = {}
+#     cycles = []
+
+#     for start_vertex in graph._graph.keys():
+#         if start_vertex not in visited:
+#             stack.append((start_vertex, None))  # None as parent of start vertex
+
+#             while stack:
+#                 current, parent = stack.pop()
+
+#                 if current in visited:
+#                     # Cycle detected, reconstruct the cycle path
+#                     cycle = []
+#                     x = current
+#                     while x != parent and x is not None:
+#                         cycle.append(x)
+#                         x = parent_map.get(x, None)
+#                     if x is not None:
+#                         cycle.append(x)
+#                         cycles.append(cycle[::-1])
+#                 else:
+#                     visited.add(current)
+#                     parent_map[current] = parent
+
+#                     for neighbor in graph.get_neighbors(current):
+#                         if neighbor != parent:  # To avoid immediate back edge to parent
+#                             stack.append((neighbor, current))
+
+#     return cycles
+
+
+# def find_cycles(graph:Graph):
+#     visited = set()
+#     stack = []
+#     cycles = []
+
+#     for start_vertex in graph._graph.keys():
+#         if start_vertex not in visited:
+#             stack.append(start_vertex)  # None as parent of start vertex
+
+#             while stack:
+#                 current = stack.pop()
+                
+#                 if current in visited:
+#                     # Cycle detected, reconstruct the cycle path
+#                     cycle = []
+#                     x = current
+#                     while x != parent:
+#                         cycle.append(x)
+#                         x = parent_map[x]
+#                     cycle.append(current)
+#                     cycles.append(cycle[::-1])
+#                 else:
+#                     visited.add(current)
+#                     parent_map[current] = parent
+
+#                     for neighbor in graph.get_neighbors(current):
+#                         if neighbor != parent:  # To avoid immediate back edge to parent
+#                             stack.append((neighbor, current))
+
+#     return cycles
 
 
 
+print(len(max(find_cycles(directedGraph),key=len)))
+
+
+# clustering coeficient
+
+def calculate_clustering_coefficient(graph: Graph) -> float:
+    def local_clustering_coefficient(vertex: str) -> float:
+        neighbors = graph.get_neighbors(vertex)
+        if len(neighbors) < 2:
+            return 0.0
+        total_possible_edges = len(neighbors) * (len(neighbors) - 1)
+        actual_edges = 0
+
+        for i in range(len(neighbors)):
+            for j in range(len(neighbors)):
+                if i != j and graph.edge_exists(neighbors[i], neighbors[j]):
+                    actual_edges += 1
+
+        return actual_edges / total_possible_edges
     
+    vertices = graph._graph.keys()
+    total_clustering_coefficient = 0.0
+    for vertex in vertices:
+        total_clustering_coefficient += local_clustering_coefficient(vertex)
+    
+    return total_clustering_coefficient / len(vertices) if len(vertices) > 0 else 0.0
+
+print(calculate_clustering_coefficient(directedGraph))    
