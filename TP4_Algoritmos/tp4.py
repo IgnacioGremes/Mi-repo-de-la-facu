@@ -98,10 +98,8 @@ def find_WCC(graph: Graph) -> List[Set[str]]:
     
     for vertex in graph._graph:
         if vertex not in visited:
-            # print(f"Doing DFS{vertex}")
             component = iterative_dfs(graph,vertex, visited)
             components.append(component)
-            # if component != None:
     
     return components
 
@@ -113,8 +111,8 @@ wccs = find_WCC(nonDirectedGraph)
 largest_wcc = max(wccs, key=len)
 
 # print(f"The largest SCC is: {largest_scc}")
-print(f"Size of the largest SCC: {len(largest_wcc)}")
-print(f"Total amount of SCC:{len(wccs)}")
+print(f"Size of the largest WCC: {len(largest_wcc)}")
+print(f"Total amount of WCC:{len(wccs)}")
 
 # 3) cantidad de triangulos
 
@@ -234,53 +232,53 @@ maxDistances = []
 
 # 6) 
 
-def find_cycles(graph: Graph) -> List[List[str]]:
-    index = 0
-    stack = []
-    index_map = {}
-    lowlink_map = {}
-    on_stack = {}
-    cycles = []
-    call_stack = []
+# def find_cycles(graph: Graph) -> List[List[str]]:
+#     index = 0
+#     stack = []
+#     index_map = {}
+#     lowlink_map = {}
+#     on_stack = {}
+#     cycles = []
+#     call_stack = []
 
-    for vertex in graph._graph.keys():
-        if vertex not in index_map:
-            call_stack.append((vertex, 'entry'))
+#     for vertex in graph._graph.keys():
+#         if vertex not in index_map:
+#             call_stack.append((vertex, 'entry'))
 
-            while call_stack:
-                current, stage = call_stack.pop()
+#             while call_stack:
+#                 current, stage = call_stack.pop()
 
-                if stage == 'entry':
-                    index_map[current] = index
-                    lowlink_map[current] = index
-                    index += 1
-                    stack.append(current)
-                    on_stack[current] = True
+#                 if stage == 'entry':
+#                     index_map[current] = index
+#                     lowlink_map[current] = index
+#                     index += 1
+#                     stack.append(current)
+#                     on_stack[current] = True
 
-                    call_stack.append((current, 'exit'))
-                    for neighbor in graph.get_neighbors(current):
-                        if neighbor not in index_map:
-                            call_stack.append((neighbor, 'entry'))
-                        elif on_stack.get(neighbor, False):
-                            lowlink_map[current] = min(lowlink_map[current], index_map[neighbor])
+#                     call_stack.append((current, 'exit'))
+#                     for neighbor in graph.get_neighbors(current):
+#                         if neighbor not in index_map:
+#                             call_stack.append((neighbor, 'entry'))
+#                         elif on_stack.get(neighbor, False):
+#                             lowlink_map[current] = min(lowlink_map[current], index_map[neighbor])
 
-                elif stage == 'exit':
-                    for neighbor in graph.get_neighbors(current):
-                        if neighbor in index_map and on_stack.get(neighbor, False):
-                            lowlink_map[current] = min(lowlink_map[current], lowlink_map[neighbor])
+#                 elif stage == 'exit':
+#                     for neighbor in graph.get_neighbors(current):
+#                         if neighbor in index_map and on_stack.get(neighbor, False):
+#                             lowlink_map[current] = min(lowlink_map[current], lowlink_map[neighbor])
 
-                    if lowlink_map[current] == index_map[current]:
-                        cycle = []
-                        while True:
-                            w = stack.pop()
-                            on_stack[w] = False
-                            cycle.append(w)
-                            if w == current:
-                                break
-                        if len(cycle) > 1 or (len(cycle) == 1 and current in graph.get_neighbors(current)):
-                            cycles.append(cycle)
+#                     if lowlink_map[current] == index_map[current]:
+#                         cycle = []
+#                         while True:
+#                             w = stack.pop()
+#                             on_stack[w] = False
+#                             cycle.append(w)
+#                             if w == current:
+#                                 break
+#                         if len(cycle) > 1 or (len(cycle) == 1 and current in graph.get_neighbors(current)):
+#                             cycles.append(cycle)
 
-    return cycles
+#     return cycles
 
 # def find_cycles(graph:Graph) -> List[List[str]]:
 #     visited = set()
@@ -347,33 +345,101 @@ def find_cycles(graph: Graph) -> List[List[str]]:
 
 #     return cycles
 
+# def find_cycles_of_increasing_size(graph: Graph, timeout: int) -> List[List[str]]:
+#     start_time = time.time()
+#     cycles = []
+
+#     def iterative_dfs(start_vertex: str, target_length: int) -> None:
+#         stack = [(start_vertex, [start_vertex])]
+#         while stack:
+#             current_vertex, path = stack.pop()
+#             if len(path) == target_length:
+#                 if current_vertex == start_vertex:
+#                     cycles.append(path[:])
+#                     print(f"Cycle of size {target_length} has been found")
+#                     print(cycles)
+#                 return
+#             for neighbor in graph.get_neighbors(current_vertex):
+#                 if neighbor not in path or (len(path) == target_length - 1 and neighbor == start_vertex):
+#                     stack.append((neighbor, path + [neighbor]))
+#             if time.time() - start_time > timeout:
+#                 return
+
+#     target_length = 2
+#     while time.time() - start_time <= timeout:
+#         for vertex in graph._graph:
+#             iterative_dfs(vertex, target_length)
+#         target_length += 1
+
+#     return cycles
+
+def find_cycles(graph:Graph, timeout: float) -> List[List[str]]:
+    start_time = time.time()
+
+    def iterative_dfs(start_vertex: str, size: int) -> Optional[List[str]]:
+        stack = [(start_vertex, [start_vertex], {start_vertex})]
+
+        while stack:
+            if time.time() - start_time > timeout:
+                raise TimeoutError("Search timed out")
+
+            current_vertex, path, visited = stack.pop()
+            if len(path) == size:
+                if path[-1] in graph.get_neighbors(start_vertex):
+                    return path
+                continue
+
+            for neighbor in graph.get_neighbors(current_vertex):
+                if neighbor not in visited:
+                    new_visited = visited.copy()
+                    new_visited.add(neighbor)
+                    stack.append((neighbor, path + [neighbor], new_visited))
+
+        return None
+
+    for size in range(2, len(graph._graph) + 1):
+        try:
+            for vertex in graph._graph:
+                cycle = iterative_dfs(vertex, size)
+                if cycle:
+                    print(f"Cycle of size {size} found: {cycle}")
+                    break
+            # else:
+            continue
+            break
+        except TimeoutError:
+            print("Timeout reached")
+            break
+
+    return []
 
 
-print(len(max(find_cycles(directedGraph),key=len)))
-
+# print(len(max(find_cycles(directedGraph,600),key=len)))
+find_cycles(directedGraph,600)
 
 # clustering coeficient
 
-def calculate_clustering_coefficient(graph: Graph) -> float:
-    def local_clustering_coefficient(vertex: str) -> float:
-        neighbors = graph.get_neighbors(vertex)
-        if len(neighbors) < 2:
-            return 0.0
-        total_possible_edges = len(neighbors) * (len(neighbors) - 1)
-        actual_edges = 0
+# def calculate_clustering_coefficient(graph: Graph) -> float:
+#     def local_clustering_coefficient(vertex: str) -> float:
+#         neighbors = graph.get_neighbors(vertex)
+#         if len(neighbors) < 2:
+#             return 0.0
+#         total_possible_edges = len(neighbors) * (len(neighbors) - 1)
+#         actual_edges = 0
 
-        for i in range(len(neighbors)):
-            for j in range(len(neighbors)):
-                if i != j and graph.edge_exists(neighbors[i], neighbors[j]):
-                    actual_edges += 1
+#         for i in range(len(neighbors)):
+#             for j in range(len(neighbors)):
+#                 if i != j and graph.edge_exists(neighbors[i], neighbors[j]):
+#                     actual_edges += 1
 
-        return actual_edges / total_possible_edges
+#         return actual_edges / total_possible_edges
     
-    vertices = graph._graph.keys()
-    total_clustering_coefficient = 0.0
-    for vertex in vertices:
-        total_clustering_coefficient += local_clustering_coefficient(vertex)
+#     vertices = graph._graph.keys()
+#     total_clustering_coefficient = 0.0
+#     for vertex in vertices:
+#         total_clustering_coefficient += local_clustering_coefficient(vertex)
     
-    return total_clustering_coefficient / len(vertices) if len(vertices) > 0 else 0.0
+#     return total_clustering_coefficient / len(vertices) if len(vertices) > 0 else 0.0
 
-print(calculate_clustering_coefficient(directedGraph))    
+# print(calculate_clustering_coefficient(directedGraph))    
+# print(calculate_clustering_coefficient(nonDirectedGraph))    
