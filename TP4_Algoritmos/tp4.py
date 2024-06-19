@@ -9,7 +9,7 @@ import random
 #'C:/Users/iegre/OneDrive/Escritorio/repositorio Git/Mi Repositorio/Mi-repo-de-la-facu/TP4_Algoritmos/web-Google.txt'
 def createGraph(directional):
     page_graph = Graph()
-    with open('C:/Users/iegre/OneDrive/Escritorio/repositorio Git/Mi Repositorio/Mi-repo-de-la-facu/TP4_Algoritmos/web-Google.txt', 'r') as file:
+    with open('/home/ig/Desktop/Repositorios Git/Mi Repositorio/Mi-repo-de-la-facu/TP4_Algoritmos/web-Google.txt', 'r') as file:
         for l in file:
             if "# FromNodeId	ToNodeId" in l:
                 break
@@ -79,6 +79,7 @@ nonDirectedGraph = createGraph(directional=False)
 #             scc_components.append(component)
 
 #     return scc_components
+#1)
 
 def iterative_dfs(graph:Graph,start_vertex: str, visited: Set[str],) -> Set[str]:
     stack = [start_vertex]
@@ -103,42 +104,18 @@ def find_WCC(graph: Graph) -> List[Set[str]]:
     
     return components
 
-#1) Cantidad de componentes conexos y conexo mas grande 
 
-wccs = find_WCC(nonDirectedGraph)
+# wccs = find_WCC(nonDirectedGraph)
 
-# Find the largest SCC by size
-largest_wcc = max(wccs, key=len)
+# largest_wcc = max(wccs, key=len)
 
-# print(f"The largest SCC is: {largest_scc}")
-print(f"Size of the largest WCC: {len(largest_wcc)}")
-print(f"Total amount of WCC:{len(wccs)}")
-
-# 3) cantidad de triangulos
-
-def find_cycle_triangles(graph:Graph) -> List[Tuple[str, str, str]]:
-    cycle_triangles = []
-    for v1 in graph._graph:
-        for v2 in graph.get_neighbors(v1):
-            for v3 in graph.get_neighbors(v2):
-                if v1 in graph.get_neighbors(v3):
-                    cycle_triangles.append((v1, v2, v3))
-    return cycle_triangles
-
-#--------------------------------------------
-# cantidadTriangulos20 = find_cycle_triangles(directedGraph)
+# print(f"Size of the largest WCC: {len(largest_wcc)}")
+# print(f"Total amount of WCC:{len(wccs)}")
 
 
-
-# print(f"La cantidad de triagulos son:{len(cantidadTriangulos20)/3}")
-
-# 3)
+# 2)
 
 def bfs_shortest_paths(graph:Graph, start_vertex: str):
-    # if start_vertex not in graph._graph:
-    #     raise ValueError("The start vertex does not exist")
-
-    #float('inf')
     distances = {vertex:-1 for vertex in graph._graph}
     distances[start_vertex] = 0
 
@@ -149,7 +126,7 @@ def bfs_shortest_paths(graph:Graph, start_vertex: str):
         current_distance = distances[current_vertex]
 
         for neighbor in graph.get_neighbors(current_vertex):
-            if distances[neighbor] == -1: #float('inf'):  # not visited yet
+            if distances[neighbor] == -1:
                 distances[neighbor] = current_distance + 1
                 queue.append(neighbor)
 
@@ -167,9 +144,9 @@ def bfs_shortest_paths_with_time(graph:Graph, start_vertex: str):
     return distances, elapsed_time
 
 
-times =[]
-allDistances = []
-maxDistances = []
+# times =[]
+# allDistances = []
+# maxDistances = []
 
 # for _ in range(100):
 #     starting_vertex = random.choice(list(directedGraph._graph.items()))
@@ -183,32 +160,47 @@ maxDistances = []
 # print(f"Aproximate time taken to find shortest path of all nodes: {sum(times)/100 * 875713}")
 # print(f"Aproximate time taken in hours to find shortest path of all nodes: {sum(times)/100 * 875713 /60/60}")
 
-# # 4) 
+# 3) cantidad de triangulos
+
+def find_cycle_triangles(graph:Graph) -> List[Tuple[str, str, str]]:
+    cycle_triangles = []
+    for v1 in graph._graph:
+        for v2 in graph.get_neighbors(v1):
+            for v3 in graph.get_neighbors(v2):
+                if v1 in graph.get_neighbors(v3):
+                    cycle_triangles.append((v1, v2, v3))
+    return cycle_triangles
+
+# cantidadTriangulos20 = find_cycle_triangles(directedGraph)
+# print(f"La cantidad de triangulos son:{len(cantidadTriangulos20)}")
+
+# 4)
+ 
 # print(f"The diameter of the graph is aproximatly: {max(maxDistances)}")
 
 # 5)
 
-# def random_walk(graph:Graph, start_vertex: str, steps: int) -> Dict[str, int]:
-#     if not graph.vertex_exists(start_vertex):
-#         raise ValueError("The start vertex does not exist")
+def random_walk(graph:Graph, start_vertex: str, steps: int) -> Dict[str, int]:
+    if not graph.vertex_exists(start_vertex):
+        raise ValueError("The start vertex does not exist")
 
-#     visit_count = {}
-#     current_vertex = start_vertex
-#     visit_count[current_vertex] = 1
+    visit_count = {}
+    current_vertex = start_vertex
+    visit_count[current_vertex] = 1
 
-#     for _ in range(steps):
-#         neighbors = graph.get_neighbors(current_vertex)
-#         if not neighbors:
-#             break 
-#         current_vertex = random.choice(neighbors)
-#         if current_vertex  in visit_count:
-#             visit_count[current_vertex] += 1
-#         else:
-#             visit_count[current_vertex] = 1
+    for _ in range(steps):
+        neighbors = graph.get_neighbors(current_vertex)
+        if not neighbors:
+            break 
+        current_vertex = random.choice(neighbors)
+        if current_vertex  in visit_count:
+            visit_count[current_vertex] += 1
+        else:
+            visit_count[current_vertex] = 1
 
-#     return visit_count
+    return visit_count
 
-# steps = 100
+# steps = 500
 # finalResult = {}
 # for _ in range(steps):
 #     starting_vertex = random.choice(list(directedGraph._graph.items()))
@@ -228,185 +220,51 @@ maxDistances = []
 # for i in range(1,6):
 #     for key in finalResult :
 #         if finalResult[key] == orderedValues[-i]:
-#             print(f"This node {key} appeared {orderedValues[-i]} times")
+#             # print(f"This node {key} appeared {orderedValues[-i]} times")
+#             print(f"This node {key} has Page Rank of  {orderedValues[-i] / len(directedGraph._graph.keys())}")
 
 # 6) 
-
-# def find_cycles(graph: Graph) -> List[List[str]]:
-#     index = 0
-#     stack = []
-#     index_map = {}
-#     lowlink_map = {}
-#     on_stack = {}
-#     cycles = []
-#     call_stack = []
-
-#     for vertex in graph._graph.keys():
-#         if vertex not in index_map:
-#             call_stack.append((vertex, 'entry'))
-
-#             while call_stack:
-#                 current, stage = call_stack.pop()
-
-#                 if stage == 'entry':
-#                     index_map[current] = index
-#                     lowlink_map[current] = index
-#                     index += 1
-#                     stack.append(current)
-#                     on_stack[current] = True
-
-#                     call_stack.append((current, 'exit'))
-#                     for neighbor in graph.get_neighbors(current):
-#                         if neighbor not in index_map:
-#                             call_stack.append((neighbor, 'entry'))
-#                         elif on_stack.get(neighbor, False):
-#                             lowlink_map[current] = min(lowlink_map[current], index_map[neighbor])
-
-#                 elif stage == 'exit':
-#                     for neighbor in graph.get_neighbors(current):
-#                         if neighbor in index_map and on_stack.get(neighbor, False):
-#                             lowlink_map[current] = min(lowlink_map[current], lowlink_map[neighbor])
-
-#                     if lowlink_map[current] == index_map[current]:
-#                         cycle = []
-#                         while True:
-#                             w = stack.pop()
-#                             on_stack[w] = False
-#                             cycle.append(w)
-#                             if w == current:
-#                                 break
-#                         if len(cycle) > 1 or (len(cycle) == 1 and current in graph.get_neighbors(current)):
-#                             cycles.append(cycle)
-
-#     return cycles
-
-# def find_cycles(graph:Graph) -> List[List[str]]:
-#     visited = set()
-#     stack = []
-#     parent_map: Dict[str, str] = {}
-#     cycles = []
-
-#     for start_vertex in graph._graph.keys():
-#         if start_vertex not in visited:
-#             stack.append((start_vertex, None))  # None as parent of start vertex
-
-#             while stack:
-#                 current, parent = stack.pop()
-
-#                 if current in visited:
-#                     # Cycle detected, reconstruct the cycle path
-#                     cycle = []
-#                     x = current
-#                     while x != parent and x is not None:
-#                         cycle.append(x)
-#                         x = parent_map.get(x, None)
-#                     if x is not None:
-#                         cycle.append(x)
-#                         cycles.append(cycle[::-1])
-#                 else:
-#                     visited.add(current)
-#                     parent_map[current] = parent
-
-#                     for neighbor in graph.get_neighbors(current):
-#                         if neighbor != parent:  # To avoid immediate back edge to parent
-#                             stack.append((neighbor, current))
-
-#     return cycles
-
-
-# def find_cycles(graph:Graph):
-#     visited = set()
-#     stack = []
-#     cycles = []
-
-#     for start_vertex in graph._graph.keys():
-#         if start_vertex not in visited:
-#             stack.append(start_vertex)  # None as parent of start vertex
-
-#             while stack:
-#                 current = stack.pop()
-                
-#                 if current in visited:
-#                     # Cycle detected, reconstruct the cycle path
-#                     cycle = []
-#                     x = current
-#                     while x != parent:
-#                         cycle.append(x)
-#                         x = parent_map[x]
-#                     cycle.append(current)
-#                     cycles.append(cycle[::-1])
-#                 else:
-#                     visited.add(current)
-#                     parent_map[current] = parent
-
-#                     for neighbor in graph.get_neighbors(current):
-#                         if neighbor != parent:  # To avoid immediate back edge to parent
-#                             stack.append((neighbor, current))
-
-#     return cycles
-
-# def find_cycles_of_increasing_size(graph: Graph, timeout: int) -> List[List[str]]:
-#     start_time = time.time()
-#     cycles = []
-
-#     def iterative_dfs(start_vertex: str, target_length: int) -> None:
-#         stack = [(start_vertex, [start_vertex])]
-#         while stack:
-#             current_vertex, path = stack.pop()
-#             if len(path) == target_length:
-#                 if current_vertex == start_vertex:
-#                     cycles.append(path[:])
-#                     print(f"Cycle of size {target_length} has been found")
-#                     print(cycles)
-#                 return
-#             for neighbor in graph.get_neighbors(current_vertex):
-#                 if neighbor not in path or (len(path) == target_length - 1 and neighbor == start_vertex):
-#                     stack.append((neighbor, path + [neighbor]))
-#             if time.time() - start_time > timeout:
-#                 return
-
-#     target_length = 2
-#     while time.time() - start_time <= timeout:
-#         for vertex in graph._graph:
-#             iterative_dfs(vertex, target_length)
-#         target_length += 1
-
-#     return cycles
 
 def find_cycles(graph:Graph, timeout: float) -> List[List[str]]:
     start_time = time.time()
 
     def iterative_dfs(start_vertex: str, size: int) -> Optional[List[str]]:
-        stack = [(start_vertex, [start_vertex], {start_vertex})]
+
+        # stack = [(start_vertex, [start_vertex], {start_vertex})]
+        stack = [(start_vertex, [start_vertex])]
+        visited = set()
 
         while stack:
             if time.time() - start_time > timeout:
                 raise TimeoutError("Search timed out")
 
-            current_vertex, path, visited = stack.pop()
+            # current_vertex, path, visited = stack.pop()
+            current_vertex, path = stack.pop()
+
             if len(path) == size:
-                if path[-1] in graph.get_neighbors(start_vertex):
+                # if path[-1] in graph.get_neighbors(start_vertex):
+                if start_vertex in graph.get_neighbors(path[-1]):
+
                     return path
                 continue
 
             for neighbor in graph.get_neighbors(current_vertex):
                 if neighbor not in visited:
-                    new_visited = visited.copy()
-                    new_visited.add(neighbor)
-                    stack.append((neighbor, path + [neighbor], new_visited))
-
+                    # new_visited = visited.copy()
+                    # new_visited.add(neighbor)
+                    visited.add(neighbor)
+                    # stack.append((neighbor, path + [neighbor], new_visited))
+                    stack.append((neighbor, path + [neighbor]))
         return None
 
-    for size in range(2, len(graph._graph) + 1):
+    for size in range(2, len(graph._graph)):
         try:
             for vertex in graph._graph:
                 cycle = iterative_dfs(vertex, size)
                 if cycle:
                     print(f"Cycle of size {size} found: {cycle}")
                     break
-            # else:
             continue
-            break
         except TimeoutError:
             print("Timeout reached")
             break
@@ -414,32 +272,33 @@ def find_cycles(graph:Graph, timeout: float) -> List[List[str]]:
     return []
 
 
-# print(len(max(find_cycles(directedGraph,600),key=len)))
 find_cycles(directedGraph,600)
+
+
+# EXTRAS
 
 # clustering coeficient
 
-# def calculate_clustering_coefficient(graph: Graph) -> float:
-#     def local_clustering_coefficient(vertex: str) -> float:
-#         neighbors = graph.get_neighbors(vertex)
-#         if len(neighbors) < 2:
-#             return 0.0
-#         total_possible_edges = len(neighbors) * (len(neighbors) - 1)
-#         actual_edges = 0
+def calculate_clustering_coefficient(graph: Graph) -> float:
+    def local_clustering_coefficient(vertex: str) -> float:
+        neighbors = graph.get_neighbors(vertex)
+        if len(neighbors) < 2:
+            return 0.0
+        total_possible_edges = len(neighbors) * (len(neighbors) - 1)
+        actual_edges = 0
 
-#         for i in range(len(neighbors)):
-#             for j in range(len(neighbors)):
-#                 if i != j and graph.edge_exists(neighbors[i], neighbors[j]):
-#                     actual_edges += 1
+        for i in range(len(neighbors)):
+            for j in range(len(neighbors)):
+                if i != j and graph.edge_exists(neighbors[i], neighbors[j]):
+                    actual_edges += 1
 
-#         return actual_edges / total_possible_edges
+        return actual_edges / total_possible_edges
     
-#     vertices = graph._graph.keys()
-#     total_clustering_coefficient = 0.0
-#     for vertex in vertices:
-#         total_clustering_coefficient += local_clustering_coefficient(vertex)
+    vertices = graph._graph.keys()
+    total_clustering_coefficient = 0.0
+    for vertex in vertices:
+        total_clustering_coefficient += local_clustering_coefficient(vertex)
     
-#     return total_clustering_coefficient / len(vertices) if len(vertices) > 0 else 0.0
+    return total_clustering_coefficient / len(vertices) if len(vertices) > 0 else 0.0
 
-# print(calculate_clustering_coefficient(directedGraph))    
 # print(calculate_clustering_coefficient(nonDirectedGraph))    
