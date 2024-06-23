@@ -1,15 +1,12 @@
 from graph import Graph
 from typing import List, Dict, Set, Optional, Any,Tuple
-from collections import deque,defaultdict
+from collections import deque
 import time
 import random
 
-
-#/home/ig/Desktop/Repositorios Git/Mi Repositorio/Mi-repo-de-la-facu/TP4_Algoritmos/web-Google.txt
-#'C:/Users/iegre/OneDrive/Escritorio/repositorio Git/Mi Repositorio/Mi-repo-de-la-facu/TP4_Algoritmos/web-Google.txt'
 def createGraph(directional):
     page_graph = Graph()
-    with open('/home/ig/Desktop/Repositorios Git/Mi Repositorio/Mi-repo-de-la-facu/TP4_Algoritmos/web-Google.txt', 'r') as file:
+    with open('C:/Users/iegre/OneDrive/Escritorio/repositorio Git/Mi Repositorio/Mi-repo-de-la-facu/TP4_Algoritmos/web-Google.txt', 'r') as file:
         for l in file:
             if "# FromNodeId	ToNodeId" in l:
                 break
@@ -33,52 +30,6 @@ def createGraph(directional):
 directedGraph = createGraph(directional=True)
 nonDirectedGraph = createGraph(directional=False)
 
-# def kosaraju_iterative(graph:Graph):    #Funciona
-#     stack = []
-#     visited = set()
-#     sccs = []
-
-#     for vertex in graph._graph:
-#         if vertex not in visited:
-#             stack.append(vertex)
-#             visited.add(vertex)
-#             while stack:
-#                 current = stack[-1]
-#                 if current in graph._graph:
-#                     neighbors = [neighbor for neighbor in graph.get_neighbors(current) if neighbor not in visited]
-#                     if neighbors:
-#                         stack.append(neighbors[0])
-#                         visited.add(neighbors[0])
-#                     else:
-#                         stack.pop()
-#                         sccs.append(current)
-#                 else:
-#                     stack.pop()
-
-#     reversed_graph = {}
-#     for u in graph._graph:
-#         for v in graph.get_neighbors(u):
-#             if v not in reversed_graph:
-#                 reversed_graph[v] = set()
-#             reversed_graph[v].add(u)
-
-#     visited.clear()
-#     scc_components = []
-#     for node in reversed(sccs):
-#         if node not in visited:
-#             stack = [node]
-#             component = []
-#             visited.add(node)
-#             while stack:
-#                 current = stack.pop()
-#                 component.append(current)
-#                 for neighbor in reversed_graph.get(current, []):
-#                     if neighbor not in visited:
-#                         stack.append(neighbor)
-#                         visited.add(neighbor)
-#             scc_components.append(component)
-
-#     return scc_components
 #1)
 
 def iterative_dfs(graph:Graph,start_vertex: str, visited: Set[str],) -> Set[str]:
@@ -105,12 +56,12 @@ def find_WCC(graph: Graph) -> List[Set[str]]:
     return components
 
 
-# wccs = find_WCC(nonDirectedGraph)
+wccs = find_WCC(nonDirectedGraph)
 
-# largest_wcc = max(wccs, key=len)
+largest_wcc = max(wccs, key=len)
 
-# print(f"Size of the largest WCC: {len(largest_wcc)}")
-# print(f"Total amount of WCC:{len(wccs)}")
+print(f"Size of the largest WCC: {len(largest_wcc)}")
+print(f"Total amount of WCC:{len(wccs)}")
 
 
 # 2)
@@ -144,21 +95,21 @@ def bfs_shortest_paths_with_time(graph:Graph, start_vertex: str):
     return distances, elapsed_time
 
 
-# times =[]
-# allDistances = []
-# maxDistances = []
+times =[]
+allDistances = []
+maxDistances = []
 
-# for _ in range(100):
-#     starting_vertex = random.choice(list(directedGraph._graph.items()))
-#     distances , elapsed_time = bfs_shortest_paths_with_time(directedGraph,starting_vertex[0]) 
-#     times.append(elapsed_time)
-#     allDistances.append(distances)
-#     maxDistances.append(max(distances.values()))
+for _ in range(100):
+    starting_vertex = random.choice(list(directedGraph._graph.items()))
+    distances , elapsed_time = bfs_shortest_paths_with_time(directedGraph,starting_vertex[0]) 
+    times.append(elapsed_time)
+    allDistances.append(distances)
+    maxDistances.append(max(distances.values()))
 
-# print(f"Time taken to find shortest path of 100 nodes: {sum(times)}")
-# print(f"Aproximate time taken to find shortest path of 1 node: {sum(times)/100}")
-# print(f"Aproximate time taken to find shortest path of all nodes: {sum(times)/100 * 875713}")
-# print(f"Aproximate time taken in hours to find shortest path of all nodes: {sum(times)/100 * 875713 /60/60}")
+print(f"Time taken to find shortest path of 100 nodes: {sum(times)}")
+print(f"Aproximate time taken to find shortest path of 1 node: {sum(times)/100}")
+print(f"Aproximate time taken to find shortest path of all nodes: {sum(times)/100 * 875713}")
+print(f"Aproximate time taken in hours to find shortest path of all nodes: {sum(times)/100 * 875713 /60/60}")
 
 # 3) cantidad de triangulos
 
@@ -171,19 +122,16 @@ def find_cycle_triangles(graph:Graph) -> List[Tuple[str, str, str]]:
                     cycle_triangles.append((v1, v2, v3))
     return cycle_triangles
 
-# cantidadTriangulos20 = find_cycle_triangles(directedGraph)
-# print(f"La cantidad de triangulos son:{len(cantidadTriangulos20)}")
+cantidadTriangulos20 = find_cycle_triangles(directedGraph)
+print(f"Quantity of triangles:{len(cantidadTriangulos20)}")
 
 # 4)
  
-# print(f"The diameter of the graph is aproximatly: {max(maxDistances)}")
+print(f"The diameter of the graph is aproximatly: {max(maxDistances)}")
 
 # 5)
 
 def random_walk(graph:Graph, start_vertex: str, steps: int) -> Dict[str, int]:
-    if not graph.vertex_exists(start_vertex):
-        raise ValueError("The start vertex does not exist")
-
     visit_count = {}
     current_vertex = start_vertex
     visit_count[current_vertex] = 1
@@ -200,37 +148,30 @@ def random_walk(graph:Graph, start_vertex: str, steps: int) -> Dict[str, int]:
 
     return visit_count
 
-# steps = 500
-# finalResult = {}
-# for _ in range(steps):
-#     starting_vertex = random.choice(list(directedGraph._graph.items()))
-#     result = random_walk(directedGraph,starting_vertex[0], steps)
-#     for item in result:
-#         if item in finalResult:
-#             finalResult[item] += result[item]
-#         else:
-#             finalResult[item] = result[item]
-        
-# noRepeatsResultValues = []
-# for value in finalResult.values():
-#     if value not in noRepeatsResultValues:
-#         noRepeatsResultValues.append(value)
-# orderedValues = sorted(noRepeatsResultValues)
-# res = []
-# for i in range(1,6):
-#     for key in finalResult :
-#         if finalResult[key] == orderedValues[-i]:
-#             # print(f"This node {key} appeared {orderedValues[-i]} times")
-#             print(f"This node {key} has Page Rank of  {orderedValues[-i] / len(directedGraph._graph.keys())}")
+steps = 300
+quantOfRandomNodes = 100
+finalResult = {}
+for _ in range(quantOfRandomNodes):
+    starting_vertex = random.choice(list(directedGraph._graph.items()))
+    result = random_walk(directedGraph,starting_vertex[0], steps)
+    for item in result:
+        if item in finalResult:
+            finalResult[item] += result[item]
+        else:
+            finalResult[item] = result[item]
+
+top_10_vertices = sorted(finalResult.items(), key=lambda item: item[1], reverse=True)[:10]
+print(top_10_vertices)
+for vertice in top_10_vertices:
+    print(f"This node {vertice[0]} has Page Rank of  {vertice[1] / len(directedGraph._graph.keys())}")
 
 # 6) 
 
-def find_cycles(graph:Graph, timeout: float) -> List[List[str]]:
+def find_cycles(graph:Graph, timeout: float):
     start_time = time.time()
 
-    def iterative_dfs(start_vertex: str, size: int) -> Optional[List[str]]:
+    def iterative_dfs(start_vertex: str, size: int):
 
-        # stack = [(start_vertex, [start_vertex], {start_vertex})]
         stack = [(start_vertex, [start_vertex])]
         visited = set()
 
@@ -238,11 +179,9 @@ def find_cycles(graph:Graph, timeout: float) -> List[List[str]]:
             if time.time() - start_time > timeout:
                 raise TimeoutError("Search timed out")
 
-            # current_vertex, path, visited = stack.pop()
             current_vertex, path = stack.pop()
 
             if len(path) == size:
-                # if path[-1] in graph.get_neighbors(start_vertex):
                 if start_vertex in graph.get_neighbors(path[-1]):
 
                     return path
@@ -250,10 +189,7 @@ def find_cycles(graph:Graph, timeout: float) -> List[List[str]]:
 
             for neighbor in graph.get_neighbors(current_vertex):
                 if neighbor not in visited:
-                    # new_visited = visited.copy()
-                    # new_visited.add(neighbor)
                     visited.add(neighbor)
-                    # stack.append((neighbor, path + [neighbor], new_visited))
                     stack.append((neighbor, path + [neighbor]))
         return None
 
@@ -279,8 +215,8 @@ find_cycles(directedGraph,600)
 
 # clustering coeficient
 
-def calculate_clustering_coefficient(graph: Graph) -> float:
-    def local_clustering_coefficient(vertex: str) -> float:
+def calculate_clustering_coefficient(graph: Graph):
+    def local_clustering_coefficient(vertex: str):
         neighbors = graph.get_neighbors(vertex)
         if len(neighbors) < 2:
             return 0.0
@@ -301,4 +237,33 @@ def calculate_clustering_coefficient(graph: Graph) -> float:
     
     return total_clustering_coefficient / len(vertices) if len(vertices) > 0 else 0.0
 
-# print(calculate_clustering_coefficient(nonDirectedGraph))    
+print(calculate_clustering_coefficient(nonDirectedGraph))    
+
+
+# Betweenness centrality
+
+def betweennessCentrality(graph:Graph):
+    nodeQuantityOfShortestPaths = {}
+    allDistances = []
+    counterOfTotalShortestPaths = 0
+    highestBC = [" ",-1]
+    for _ in range(100):
+        counterOfShortestPathsThorughNode = 0
+        starting_vertex = random.choice(list(graph._graph.items()))
+        distances = bfs_shortest_paths(graph,starting_vertex[0])
+        allDistances.append(distances)
+        for dist in distances.values():
+            if dist > 0:
+                counterOfTotalShortestPaths += 1
+                counterOfShortestPathsThorughNode += 1
+        nodeQuantityOfShortestPaths[starting_vertex[0]] = counterOfShortestPathsThorughNode
+    for vertex in nodeQuantityOfShortestPaths:
+        BCOfVertex = nodeQuantityOfShortestPaths[vertex] / counterOfTotalShortestPaths
+        if BCOfVertex  > highestBC[1]:
+            highestBC[0] = vertex
+            highestBC[1] = BCOfVertex
+    
+    return highestBC
+
+BC = betweennessCentrality(directedGraph)  
+print(f"The node {BC[0]} has the highest betweenness centrality of {BC[1]}")     
