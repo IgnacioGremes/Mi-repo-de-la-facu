@@ -3,8 +3,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sb
 
+
 #/home/ig/Desktop/prueba/MachineLearning/tp1/data/raw/casas_dev.csv
-file_path = 'MachineLearning/tp1/data/raw/casas_dev.csv'
 file_path = 'MachineLearning/tp1/data/processed/cleaned_casas_dev.csv'
 df = pd.read_csv(file_path)
 
@@ -42,3 +42,20 @@ plt.show()
 
 # area vs precio , age vs area y age vs precio (mostrar que se parecen mucho)
 # rooms vs area, rooms vs price 
+
+def mean_squared_error(y_true, y_pred):
+    """
+    Compute the Mean Squared Error (MSE) between true and predicted values.
+    
+    Parameters:
+    y_true (numpy.ndarray): True target values of shape (n_samples,)
+    y_pred (numpy.ndarray): Predicted target values of shape (n_samples,)
+    
+    Returns:
+    float: Mean squared error
+    """
+    y_true = y_true.reshape(-1)
+    y_pred = y_pred.reshape(-1)
+    n = len(y_true)
+    mse = np.sum((y_true - y_pred) ** 2) / n
+    return mse

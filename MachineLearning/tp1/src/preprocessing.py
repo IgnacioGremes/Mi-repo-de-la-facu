@@ -31,13 +31,14 @@ def convert_area_sqft(dataframe):
 
 df_cleaned = handle_nan_values(df) 
 convert_area_sqft(df_cleaned)
+df_cleaned = df_cleaned.drop(columns=['area_units'])
 normalize('area',df_cleaned)
 normalize('price',df_cleaned)
 normalize('age',df_cleaned)
 normalize('lat',df_cleaned)
 normalize('lon',df_cleaned)
 normalize('rooms',df_cleaned)
-print(df_cleaned)
+# print(df_cleaned)
 
 df_cleaned.to_csv('MachineLearning/tp1/data/processed/cleaned_casas_dev.csv', index=False)
 

@@ -35,7 +35,7 @@ class RegresionLineal:
         self.weights = theta
         return self.weights
 
-file_path = '/home/ig/Desktop/prueba/MachineLearning/ejer_tutorial/datasets/datos_oliva.csv'  # Reemplaza con la ruta correcta a tu archivo
+file_path = 'MachineLearning/ejer_tutorial/datasets/datos_oliva.csv'  # Reemplaza con la ruta correcta a tu archivo
 df = pd.read_csv(file_path)
 
 # Columnas
@@ -43,7 +43,7 @@ ingresos = df['Ingresos']
 colesterol = df['colesterol_malo']
 
 # Estandarizacion
-df['Ingresos'] = (ingresos - ingresos.min()) / ingresos.max()
+df['Ingresos'] = (ingresos - ingresos.min()) /(ingresos.max() - ingresos.min())
 # df['colesterol_malo'] = (colesterol - colesterol.mean()) / colesterol.std()
 
 # Regresion
