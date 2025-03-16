@@ -1,7 +1,9 @@
 import numpy as np
 import pandas as pd
 
-file_path = '/home/ig/Desktop/prueba/MachineLearning/tp1/data/raw/casas_dev.csv'
+#/home/ig/Desktop/prueba/MachineLearning/tp1/data/raw/casas_dev.csv
+
+file_path = 'MachineLearning/tp1/data/raw/casas_dev.csv'
 df = pd.read_csv(file_path)
 
 def handle_nan_values(dataframe):
@@ -27,8 +29,16 @@ def convert_area_sqft(dataframe):
 
 
 
-df = handle_nan_values(df) 
-convert_area_sqft(df)
-print(df)
+df_cleaned = handle_nan_values(df) 
+convert_area_sqft(df_cleaned)
+normalize('area',df_cleaned)
+normalize('price',df_cleaned)
+normalize('age',df_cleaned)
+normalize('lat',df_cleaned)
+normalize('lon',df_cleaned)
+normalize('rooms',df_cleaned)
+print(df_cleaned)
+
+df_cleaned.to_csv('MachineLearning/tp1/data/processed/cleaned_casas_dev.csv', index=False)
 
 # row_index = df.loc[]

@@ -172,7 +172,7 @@ def find_cycles(graph:Graph, timeout: float):
 
     def iterative_dfs(start_vertex: str, size: int):
 
-        stack = [(start_vertex, [start_vertex])]
+        stack = [(start_vertex, [startk_vertex])]
         visited = set()
 
         while stack:
