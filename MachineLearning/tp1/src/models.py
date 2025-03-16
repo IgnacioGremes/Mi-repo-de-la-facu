@@ -87,8 +87,8 @@ class LinearRegression:
 
 file_path = 'MachineLearning/tp1/data/processed/train_cleaned_casas_dev.csv'
 df = pd.read_csv(file_path)
-print(df)
 X = df.drop(columns=['price'])
+print(X)
 Y = df['price']
 
 # Regresion
