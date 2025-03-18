@@ -1,9 +1,8 @@
 import numpy as np
 import pandas as pd
 from preprocessing import normalize
-from sklearn.linear_model import LinearRegression
 
-class LinearRegressionn:
+class LinearRegression:
     def __init__(self, X, y, normalization='min-max'):
         """
         Initialize the linear regression model with normalization.
@@ -16,6 +15,11 @@ class LinearRegressionn:
         # Convert X to NumPy array if it's a pandas DataFrame
         if hasattr(X, 'values'):
             X = X.values
+
+        # Ensure X_new is 2D (even if it's a single feature)
+        if X.ndim == 1:
+            X = X.reshape(-1, 1)
+
         # Convert y to NumPy array if it's a pandas Series
         if hasattr(y, 'values'):
             y = y.values
@@ -90,6 +94,10 @@ class LinearRegressionn:
         if hasattr(X_new, 'values'):
             X_new = X_new.values
         
+        # Ensure X_new is 2D (even if it's a single feature)
+        if X_new.ndim == 1:
+            X_new = X_new.reshape(-1, 1)
+        
         # Add column of ones for intercept
         X_new = np.hstack([np.ones((X_new.shape[0], 1)), X_new])
         # Make predictions: y_pred = X_new @ coef
@@ -106,15 +114,21 @@ file_path = 'MachineLearning/tp1/data/raw/vivienda_Amanda.csv'
 df_pred = pd.read_csv(file_path)
 df_cleaned = df_pred.drop(columns=['area_units'])
 X = df.drop(columns=['price'])
-print(X)
 Y = df['price']
 
-# Regresion
-regresion = LinearRegressionn(X,Y)
+# # Regresion con solo area
+
+regresion = LinearRegression(X['area'],Y)
 regresion.fit_pseudo_inverse()
 regresion.print_coefficients()
 
-print(regresion.predict(df_cleaned))
+print(regresion.predict(df_cleaned['area']))
 
-regresos = LinearRegression().fit(X,Y)
-print(regresos.predict(df_cleaned))
+# Regresion
+
+# regresion = LinearRegression(X,Y)
+# regresion.fit_pseudo_inverse()
+# regresion.print_coefficients()
+
+# print(regresion.predict(df_cleaned))
+

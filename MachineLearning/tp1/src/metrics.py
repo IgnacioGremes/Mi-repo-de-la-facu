@@ -59,3 +59,16 @@ def mean_squared_error(y_true, y_pred):
     n = len(y_true)
     mse = np.sum((y_true - y_pred) ** 2) / n
     return mse
+
+def mean_value_per_m2(dataframe):
+    assert isinstance(dataframe, pd.DataFrame)
+    mean_list = []
+    for _ , row in dataframe.iterrows():
+        mean_list.append(row['price'] / row['area'])
+    mean = sum(mean_list) / dataframe.shape[0]
+    return mean
+
+file_path = 'MachineLearning/tp1/data/processed/cleaned_m2_casas_dev.csv'
+df1 = pd.read_csv(file_path)
+
+print(mean_value_per_m2(df1))
