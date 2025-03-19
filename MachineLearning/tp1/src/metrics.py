@@ -68,7 +68,7 @@ def mean_value_per_m2(dataframe):
     mean = sum(mean_list) / dataframe.shape[0]
     return mean
 
-file_path = 'MachineLearning/tp1/data/processed/cleaned_m2_casas_dev.csv'
+file_path = 'MachineLearning/tp1/data/processed/train_cleaned_casas_dev.csv'
 df1 = pd.read_csv(file_path)
 
 print(mean_value_per_m2(df1))
