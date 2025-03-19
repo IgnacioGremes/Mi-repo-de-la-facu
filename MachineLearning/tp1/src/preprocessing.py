@@ -94,6 +94,7 @@ df_cleaned = df_cleaned.drop(columns=['area_units'])
 
 df_cleaned.to_csv('MachineLearning/tp1/data/processed/normalized_train_casas_dev.csv', index=False)
 
+
 df_cleaned_own_featured = handle_nan_values(df)
 # convert_area_sqft_to_m2(df_cleaned_own_featured)
 df_cleaned_own_featured = df_cleaned_own_featured.drop(columns=['area_units'])
@@ -126,5 +127,33 @@ create_feature_age_range(amanda_cleaned_df)
 
 amanda_cleaned_df.to_csv('MachineLearning/tp1/data/processed/featured_Amanda.csv', index=False)
 
+# Exponential features
 
+# def expand_features(df):
+#     expanded_df = df.copy()
+#     for exp in range(2, 44):
+#         for col in df.columns:
+#             if col != 'price':
+#                 expanded_df[f'{col}^{exp}'] = df[col] ** exp
+#     return expanded_df
+
+# file_path = 'MachineLearning/tp1/data/processed/train_cleaned_casas_dev.csv'
+# df = pd.read_csv(file_path)
+# df = df.drop(columns=['area_units'])
+
+# df = expand_features(df)
+# df = df.drop(columns=['rooms^43'])
+# # print(df)
+
+# df.to_csv('MachineLearning/tp1/data/processed/exponential_featured_train_casas_dev.csv', index=False)
+
+
+# file_path = 'MachineLearning/tp1/data/processed/cleaned_Amanda.csv'
+# df = pd.read_csv(file_path)
+
+# df = expand_features(df)
+# df = df.drop(columns=['rooms^43'])
+# # print(df)
+
+# df.to_csv('MachineLearning/tp1/data/processed/exponential_featured_Amanda.csv', index=False)
 

@@ -111,8 +111,9 @@ class LinearRegression:
         self.learning_rate = learning_rate
         self.epochs = epochs
         self.theta = None
+        self.feature_names = None
     
-    def fit(self, X, y):
+    def fit(self, X, y, feature_names=None):
         # Convert X to NumPy array if it's a pandas DataFrame
         if hasattr(X, 'values'):
             X = X.values
@@ -124,7 +125,10 @@ class LinearRegression:
         # Convert y to NumPy array if it's a pandas Series
         if hasattr(y, 'values'):
             y = y.values
+
         X = np.c_[np.ones((X.shape[0], 1)), X]  # Add bias term
+        self.feature_names = ['bias'] + (feature_names if feature_names else [f'feature_{i}' for i in range(X.shape[1] - 1)])
+        
         if self.method == 'gradient_descent':
             self._fit_gradient_descent(X, y)
         elif self.method == 'pseudo_inverse':
@@ -150,27 +154,16 @@ class LinearRegression:
         # Ensure X_new is 2D (even if it's a single feature)
         if X.ndim == 1:
             X = X.reshape(-1, 1)
+
         X = np.c_[np.ones((X.shape[0], 1)), X]  # Add bias term
         return X @ self.theta
     
-    def print_coefficients(self, feature_names=None):
-        """
-        Print the coefficients in a clear format.
-        
-        Parameters:
-        feature_names (list): Optional list of feature names
-        """
-        if self.theta is None:
+    def print_coefficients(self):
+        if self.theta is None or self.feature_names is None:
             print("Model has not been trained yet.")
-            return
-        
-        if feature_names is not None:
-            self.feature_names = feature_names
-        
-        print("Linear Regression Coefficients:")
-        print(f"Intercept (w0): {self.theta[0][0]:.4f}")
-        for i, (theta, name) in enumerate(zip(self.theta[1:], self.feature_names), 1):
-            print(f"{name} (w{i}): {theta[0]:.4f}")
+        else:
+            for name, coef in zip(self.feature_names, self.theta):
+                print(f"{name}: {coef}")
     
     
 
@@ -190,24 +183,24 @@ df_pred = pd.read_csv(file_path)
 # regresion = LinearRegression(X['area'],Y)
 # regresion.fit_pseudo_inverse()
 
-regresion2 = LinearRegression(method='pseudo_inverse')
-regresion2.fit(X['area'],Y)
+regresion = LinearRegression(method='pseudo_inverse')
+regresion.fit(X['area'],Y)
 
-# regresion2.print_coefficients()
+regresion.print_coefficients()
 
-print(regresion2.predict(df_pred['area']))
+print(regresion.predict(df_pred['area']))
 
 # Regresion
 
 # regresion = LinearRegression(X,Y)
 # regresion.fit_pseudo_inverse()
 
-regresion2 = LinearRegression(method='pseudo_inverse')
-regresion2.fit(X,Y)
+regresion = LinearRegression(method='pseudo_inverse')
+regresion.fit(X,Y)
 
-# regresion2.print_coefficients()
+regresion.print_coefficients()
 
-print(regresion2.predict(df_pred))
+print(regresion.predict(df_pred))
 
 # Regresion with own features
 
@@ -223,10 +216,30 @@ Y = df['price']
 # regresion = LinearRegression(X,Y)
 # regresion.fit_pseudo_inverse()
 
-regresion2 = LinearRegression(method='pseudo_inverse')
-regresion2.fit(X,Y)
+regresion = LinearRegression(method='pseudo_inverse')
+regresion.fit(X,Y)
 
-# regresion2.print_coefficients()
+regresion.print_coefficients()
 
-print(regresion2.predict(df_pred))
+print(regresion.predict(df_pred))
+
+# Regresion with exponential features
+
+# file_path = 'MachineLearning/tp1/data/processed/exponential_featured_train_casas_dev.csv'
+# df = pd.read_csv(file_path)
+
+# file_path = 'MachineLearning/tp1/data/processed/exponential_featured_Amanda.csv'
+# df_pred = pd.read_csv(file_path)
+
+# X = df.drop(columns=['price'])
+# Y = df['price']
+
+# regresion = LinearRegression(method='pseudo_inverse')
+# regresion.fit(X,Y)
+
+# regresion.print_coefficients()
+
+# print(regresion.predict(df_pred))
+
+
 
