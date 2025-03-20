@@ -54,8 +54,8 @@ def mean_squared_error(y_true, y_pred):
     Returns:
     float: Mean squared error
     """
-    y_true = y_true.reshape(-1)
-    y_pred = y_pred.reshape(-1)
+    # y_true = y_true.reshape(-1)
+    # y_pred = y_pred.reshape(-1)
     n = len(y_true)
     mse = np.sum((y_true - y_pred) ** 2) / n
     return mse

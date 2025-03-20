@@ -1,6 +1,8 @@
 import numpy as np
 import pandas as pd
 from preprocessing import normalize
+from metrics import mean_squared_error
+from sklearn.linear_model import LinearRegression
 
 # class LinearRegression:
 #     def __init__(self, X, y, normalization='min-max'):
@@ -105,29 +107,200 @@ from preprocessing import normalize
         
 #         return y_pred.flatten()  # Return as 1D array
 
-class LinearRegression:
-    def __init__(self, method='gradient_descent', learning_rate=0.01, epochs=1000):
+
+
+
+
+# El que funciona
+
+
+
+# class LinearRegression:
+#     def __init__(self, method='gradient_descent', learning_rate=0.01, epochs=1000):
+#         self.method = method
+#         self.learning_rate = learning_rate
+#         self.epochs = epochs
+#         self.theta = None
+#         self.feature_names = None
+    
+#     def fit(self, X, y, feature_names=None):
+#         # Convert X to NumPy array if it's a pandas DataFrame
+#         if hasattr(X, 'values'):
+#             X = X.values
+
+#         # Ensure X_new is 2D (even if it's a single feature)
+#         if X.ndim == 1:
+#             X = X.reshape(-1, 1)
+
+#         # Convert y to NumPy array if it's a pandas Series
+#         if hasattr(y, 'values'):
+#             y = y.values
+
+#         X = np.c_[np.ones((X.shape[0], 1)), X]  # Add bias term
+#         self.feature_names = ['bias'] + (feature_names if feature_names else [f'feature_{i}' for i in range(X.shape[1] - 1)])
+        
+#         if self.method == 'gradient_descent':
+#             self._fit_gradient_descent(X, y)
+#         elif self.method == 'pseudo_inverse':
+#             self._fit_pseudo_inverse(X, y)
+#         else:
+#             raise ValueError("Invalid method. Choose 'gradient_descent' or 'pseudo_inverse'")
+    
+#     def _fit_gradient_descent(self, X, y):
+#         m, n = X.shape
+#         self.theta = np.zeros(n)
+#         for _ in range(self.epochs):
+#             gradients = (2/m) * X.T @ (X @ self.theta - y)
+#             self.theta -= self.learning_rate * gradients
+    
+#     def _fit_pseudo_inverse(self, X, y):
+#         self.theta = np.linalg.pinv(X) @ y  # Compute the normal equation
+    
+#     def predict(self, X):
+#         # Convert X_new to NumPy array if it's a pandas DataFrame
+#         if hasattr(X, 'values'):
+#             X = X.values
+        
+#         # Ensure X_new is 2D (even if it's a single feature)
+#         if X.ndim == 1:
+#             X = X.reshape(-1, 1)
+
+#         X = np.c_[np.ones((X.shape[0], 1)), X]  # Add bias term
+#         return X @ self.theta
+    
+#     def print_coefficients(self):
+#         if self.theta is None or self.feature_names is None:
+#             print("Model has not been trained yet.")
+#         else:
+#             for name, coef in zip(self.feature_names, self.theta):
+#                 print(f"{name}: {coef}")
+
+
+
+
+
+
+
+
+# class LinearRegressionn:
+#     def __init__(self, method='gradient_descent', learning_rate=0.01, epochs=1000):
+#         self.method = method
+#         self.learning_rate = learning_rate
+#         self.epochs = epochs
+#         self.theta = None
+#         self.feature_names = None
+    
+#     def fit(self, X, y):
+#         # Determine feature names based on the type of X
+#         if isinstance(X, pd.DataFrame):
+#             # Extract column names from DataFrame
+#             feature_names = list(X.columns)
+#         else:
+#             # Convert X to NumPy array if it's not already
+#             if hasattr(X, 'values'):
+#                 X = X.values
+#             # Ensure X is 2D (even if it's a single feature)
+#             if X.ndim == 1:
+#                 X = X.reshape(-1, 1)
+#             # Use default feature names if X is not a DataFrame
+#             feature_names = [f'feature_{i}' for i in range(X.shape[1])]
+
+#         # Convert y to NumPy array if it's a pandas Series
+#         if hasattr(y, 'values'):
+#             y = y.values
+
+#         # Convert X to NumPy array for computation
+#         X = X.values if isinstance(X, pd.DataFrame) else X
+
+#         # Add bias term (column of ones)
+#         X = np.c_[np.ones((X.shape[0], 1)), X]
+
+#         # Set feature names: 'bias' for the intercept, followed by the feature names
+#         self.feature_names = ['bias'] + feature_names
+        
+#         if self.method == 'gradient_descent':
+#             self._fit_gradient_descent(X, y)
+#         elif self.method == 'pseudo_inverse':
+#             self._fit_pseudo_inverse(X, y)
+#         else:
+#             raise ValueError("Invalid method. Choose 'gradient_descent' or 'pseudo_inverse'")
+    
+#     def _fit_gradient_descent(self, X, y):
+#         m, n = X.shape
+#         self.theta = np.zeros(n)
+#         for _ in range(self.epochs):
+#             gradients = (2/m) * X.T @ (X @ self.theta - y)
+#             self.theta -= self.learning_rate * gradients
+    
+#     def _fit_pseudo_inverse(self, X, y):
+#         self.theta = np.linalg.pinv(X) @ y  # Compute the normal equation
+    
+#     def predict(self, X):
+#         # Convert X to NumPy array if it's a pandas DataFrame
+#         if hasattr(X, 'values'):
+#             X = X.values
+        
+#         # Ensure X is 2D (even if it's a single feature)
+#         if X.ndim == 1:
+#             X = X.reshape(-1, 1)
+
+#         # Add bias term
+#         X = np.c_[np.ones((X.shape[0], 1)), X]
+#         return X @ self.theta
+    
+#     def print_coefficients(self):
+#         if self.theta is None or self.feature_names is None:
+#             print("Model has not been trained yet.")
+#         else:
+#             print("Model Coefficients:")
+#             for name, coef in zip(self.feature_names, self.theta):
+#                 print(f"{name}: {coef:.4f}")
+
+
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+
+class LinearRegressionn:
+    def __init__(self, method='gradient_descent', learning_rate=0.01, epochs=1000, L1=0.0, L2=0.0):
+        """
+        Initialize the linear regression model with L1 and L2 regularization.
+        
+        Parameters:
+        X (numpy.ndarray or pandas.DataFrame): Feature matrix of shape (n_samples, n_features)
+        y (numpy.ndarray or pandas.Series): Target vector of shape (n_samples,)
+        method (str): Training method ('gradient_descent' or 'pseudo_inverse')
+        learning_rate (float): Learning rate for gradient descent
+        epochs (int): Number of iterations for gradient descent
+        L1 (float): L1 regularization coefficient (default 0.0)
+        L2 (float): L2 regularization coefficient (default 0.0)
+        """
         self.method = method
         self.learning_rate = learning_rate
         self.epochs = epochs
-        self.theta = None
+        self.L1 = L1
+        self.L2 = L2
+        self.coef = None
         self.feature_names = None
+
     
-    def fit(self, X, y, feature_names=None):
-        # Convert X to NumPy array if it's a pandas DataFrame
-        if hasattr(X, 'values'):
-            X = X.values
+    def fit(self, X, y):
+        # Determine feature names based on the type of X
+        if isinstance(X, pd.DataFrame):
+            feature_names = list(X.columns)
+        else:
+            if hasattr(X, 'values'):
+                X = X.values
+            if X.ndim == 1:
+                X = X.reshape(-1, 1)
+            feature_names = [f'feature_{i}' for i in range(X.shape[1])]
 
-        # Ensure X_new is 2D (even if it's a single feature)
-        if X.ndim == 1:
-            X = X.reshape(-1, 1)
-
-        # Convert y to NumPy array if it's a pandas Series
         if hasattr(y, 'values'):
             y = y.values
 
+        X = X.values if isinstance(X, pd.DataFrame) else X
         X = np.c_[np.ones((X.shape[0], 1)), X]  # Add bias term
-        self.feature_names = ['bias'] + (feature_names if feature_names else [f'feature_{i}' for i in range(X.shape[1] - 1)])
+        self.feature_names = ['bias'] + feature_names
         
         if self.method == 'gradient_descent':
             self._fit_gradient_descent(X, y)
@@ -138,90 +311,177 @@ class LinearRegression:
     
     def _fit_gradient_descent(self, X, y):
         m, n = X.shape
-        self.theta = np.zeros(n)
+        self.coef = np.zeros(n)  # Initialize coefficients to zeros
         for _ in range(self.epochs):
-            gradients = (2/m) * X.T @ (X @ self.theta - y)
-            self.theta -= self.learning_rate * gradients
+            # Compute gradients for the MSE term
+            gradients = (2/m) * X.T @ (X @ self.coef - y)
+            
+            # Add L1 regularization term: L1 * sign(w)
+            if self.L1 > 0:
+                reg_grad_l1 = self.L1 * np.sign(self.coef)
+                reg_grad_l1[0] = 0  # Do not regularize the bias term
+                gradients += reg_grad_l1
+            
+            # Add L2 regularization term: 2 * L2 * w
+            if self.L2 > 0:
+                reg_grad_l2 = 2 * self.L2 * self.coef
+                reg_grad_l2[0] = 0  # Do not regularize the bias term
+                gradients += reg_grad_l2
+            
+            # Update coefficients
+            self.coef -= self.learning_rate * gradients
     
     def _fit_pseudo_inverse(self, X, y):
-        self.theta = np.linalg.pinv(X) @ y  # Compute the normal equation
+        if self.L1 > 0:
+            raise ValueError("Pseudo-inverse method does not support L1 regularization. Use gradient descent.")
+        if self.L2 > 0:
+            # Analytical solution for L2 regularization (Ridge regression)
+            n_features = X.shape[1]
+            I = np.eye(n_features)
+            I[0, 0] = 0  # Do not regularize the bias term
+            self.coef = np.linalg.inv(X.T @ X + self.L2 * I) @ X.T @ y
+        else:
+            # Standard pseudo-inverse (no regularization)
+            self.coef = np.linalg.pinv(X) @ y
     
     def predict(self, X):
-        # Convert X_new to NumPy array if it's a pandas DataFrame
         if hasattr(X, 'values'):
             X = X.values
-        
-        # Ensure X_new is 2D (even if it's a single feature)
         if X.ndim == 1:
             X = X.reshape(-1, 1)
-
-        X = np.c_[np.ones((X.shape[0], 1)), X]  # Add bias term
-        return X @ self.theta
+        X = np.c_[np.ones((X.shape[0], 1)), X]
+        return X @ self.coef
     
     def print_coefficients(self):
-        if self.theta is None or self.feature_names is None:
+        if self.coef is None or self.feature_names is None:
             print("Model has not been trained yet.")
         else:
-            for name, coef in zip(self.feature_names, self.theta):
-                print(f"{name}: {coef}")
+            print("Model Coefficients:")
+            for name, coef in zip(self.feature_names, self.coef):
+                print(f"{name}: {coef:.4f}")
     
+    def mean_squared_error(self, y_true, y_pred):
+        y_true = y_true.flatten()
+        y_pred = y_pred.flatten()
+        n = len(y_true)
+        mse = np.mean((y_true - y_pred) ** 2)
+        return mse
+
+
+
+
     
+# hacer los validation y medir el mean squared error
 
+# Read train file
 
+file_path = 'MachineLearning/tp1/data/processed/train_cleaned_casas_dev.csv'
+df_train = pd.read_csv(file_path)
+X_train = df_train.drop(columns=['price'])
+Y_train = df_train['price']
 
-file_path = 'MachineLearning/tp1/data/processed/normalized_train_casas_dev.csv'
-df = pd.read_csv(file_path)
-X = df.drop(columns=['price'])
-Y = df['price']
+# Read validation file
+
+file_path = 'MachineLearning/tp1/data/processed/val_cleaned_casas_dev.csv'
+df_val = pd.read_csv(file_path)
+X_val = df_val.drop(columns=['price'])
+Y_val = df_val['price']
+
+# Read amanda file
 
 file_path = 'MachineLearning/tp1/data/processed/cleaned_Amanda.csv'
-df_pred = pd.read_csv(file_path)
-# df_pred = df_pred.drop(columns=['area_units'])
+df_amanda = pd.read_csv(file_path)
 
-# # Regresion con solo area
+# Regresion with only area
 
-# regresion = LinearRegression(X['area'],Y)
-# regresion.fit_pseudo_inverse()
-
-regresion = LinearRegression(method='pseudo_inverse')
-regresion.fit(X['area'],Y)
+regresion = LinearRegressionn(method='pseudo_inverse')
+regresion.fit(X_train['area'],Y_train)
+print('')
 
 regresion.print_coefficients()
 
-print(regresion.predict(df_pred['area']))
+pred_val = regresion.predict(X_val['area'])
+print(f'mean squared error: {mean_squared_error(Y_val, pred_val)}')
+print(Y_val)
+print('----------------------------------------------')
+print(pred_val)
+
+pred_amanda = regresion.predict(df_amanda['area'])
+print(pred_amanda)
+
+
+# print('Resultados de sklearn')
+# reg = LinearRegression().fit(X_train['area'].to_frame(),Y_train)
+# print(reg.score(X_val['area'].to_frame(),Y_val))
+
+# print(reg.predict(df_amanda['area'].to_frame()))
+
+
+
+
 
 # Regresion
 
-# regresion = LinearRegression(X,Y)
-# regresion.fit_pseudo_inverse()
-
-regresion = LinearRegression(method='pseudo_inverse')
-regresion.fit(X,Y)
+regresion = LinearRegressionn(method='pseudo_inverse')
+regresion.fit(X_train,Y_train)
+print('')
 
 regresion.print_coefficients()
 
-print(regresion.predict(df_pred))
+pred_val = regresion.predict(X_val)
+print(f'mean squared error: {mean_squared_error(Y_val, pred_val)}')
+print(Y_val)
+print('----------------------------------------------')
+print(pred_val)
+
+pred_amanda = regresion.predict(df_amanda)
+print(pred_amanda)
+
+
+
+
+
+
+
+
+
+# Read own featured train file
+
+file_path = 'MachineLearning/tp1/data/processed/own_featured_train_casas_dev.csv'
+df = pd.read_csv(file_path)
+X_train = df.drop(columns=['price'])
+Y_train = df['price']
+
+# Read own featured validation file
+
+file_path = 'MachineLearning/tp1/data/processed/own_featured_val_casas_dev.csv'
+df_val = pd.read_csv(file_path)
+X_val = df_val.drop(columns=['price'])
+Y_val = df_val['price']
+
+# Read own featured amanda file
+
+file_path = 'MachineLearning/tp1/data/processed/own_featured_Amanda.csv'
+df_amanda = pd.read_csv(file_path)
+
 
 # Regresion with own features
 
-file_path = 'MachineLearning/tp1/data/processed/normalized_own_featured_train_casas_dev.csv'
-df = pd.read_csv(file_path)
-
-file_path = 'MachineLearning/tp1/data/processed/featured_Amanda.csv'
-df_pred = pd.read_csv(file_path)
-# df_pred = df_pred.drop(columns=['area_units'])
-X = df.drop(columns=['price'])
-Y = df['price']
-
-# regresion = LinearRegression(X,Y)
-# regresion.fit_pseudo_inverse()
-
-regresion = LinearRegression(method='pseudo_inverse')
-regresion.fit(X,Y)
+regresion = LinearRegressionn(method='pseudo_inverse')
+regresion.fit(X_train,Y_train)
 
 regresion.print_coefficients()
 
-print(regresion.predict(df_pred))
+pred_val = regresion.predict(X_val)
+print(f'mean squared error: {mean_squared_error(Y_val, pred_val)}')
+print(Y_val)
+print('----------------------------------------------')
+print(pred_val)
+
+pred_amanda = regresion.predict(df_amanda)
+print(pred_amanda)
+
+
 
 # Regresion with exponential features
 
@@ -243,3 +503,52 @@ print(regresion.predict(df_pred))
 
 
 
+
+# Regresion with L2
+
+# Read own featured train file
+
+file_path = 'MachineLearning/tp1/data/processed/own_featured_train_casas_dev.csv'
+df = pd.read_csv(file_path)
+X_train = df.drop(columns=['price'])
+Y_train = df['price']
+
+# Read own featured validation file
+
+file_path = 'MachineLearning/tp1/data/processed/own_featured_val_casas_dev.csv'
+df_val = pd.read_csv(file_path)
+X_val = df_val.drop(columns=['price'])
+Y_val = df_val['price']
+
+# Read own featured amanda file
+
+file_path = 'MachineLearning/tp1/data/processed/own_featured_Amanda.csv'
+df_amanda = pd.read_csv(file_path)
+
+# Range of L2 values to test
+l2_values = np.logspace(-4, 2, 50)  # From 10^-4 to 10^2
+# l2_values = [-3,-2,-1,1,2,3,4,5,6,7,8,9,10]
+# Store coefficients for each L2 value
+coefficients = []
+
+# Train the model for each L2 value (L1 = 0)
+for l2 in l2_values:
+    model = LinearRegressionn(method='pseudo_inverse', learning_rate=0.01, epochs=1000, L1=0.0, L2=l2)
+    model.fit(X_train,Y_train)
+    coefficients.append(model.coef)
+
+# Convert coefficients to a NumPy array for plotting
+coefficients = np.array(coefficients)
+
+# Plot the coefficients vs. L2
+plt.figure(figsize=(10, 6))
+for i, feature_name in enumerate(model.feature_names):
+    plt.plot(l2_values, coefficients[:, i], label=feature_name)
+
+plt.xscale('log')
+plt.xlabel('L2 Regularization Coefficient (L2)')
+plt.ylabel('Coefficient Value (w*)')
+plt.title('Optimal Weights vs. L2 Regularization Coefficient')
+plt.legend()
+plt.grid(True)
+plt.show()
