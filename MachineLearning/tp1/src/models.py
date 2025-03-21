@@ -529,21 +529,21 @@ df_amanda = pd.read_csv(file_path)
 l2_values = np.logspace(-4, 2, 50)  # From 10^-4 to 10^2
 # l2_values = [-3,-2,-1,1,2,3,4,5,6,7,8,9,10]
 # Store coefficients for each L2 value
-coefficients = []
+ecms = []
 
 # Train the model for each L2 value (L1 = 0)
 for l2 in l2_values:
     model = LinearRegressionn(method='pseudo_inverse', learning_rate=0.01, epochs=1000, L1=0.0, L2=l2)
     model.fit(X_train,Y_train)
-    coefficients.append(model.coef)
+    ecms.append(model.coef)
 
 # Convert coefficients to a NumPy array for plotting
-coefficients = np.array(coefficients)
+ecms = np.array(ecms)
 
 # Plot the coefficients vs. L2
 plt.figure(figsize=(10, 6))
 for i, feature_name in enumerate(model.feature_names):
-    plt.plot(l2_values, coefficients[:, i], label=feature_name)
+    plt.plot(l2_values, ecms[:, i], label=feature_name)
 
 plt.xscale('log')
 plt.xlabel('L2 Regularization Coefficient (L2)')
@@ -552,6 +552,43 @@ plt.title('Optimal Weights vs. L2 Regularization Coefficient')
 plt.legend()
 plt.grid(True)
 plt.show()
+
+# Elegir lambda fundamentado
+print('')
+print('Elegir lambda')
+model = LinearRegressionn(method='pseudo_inverse', learning_rate=0.01, epochs=1000, L1=0.0, L2=6)
+model.fit(X_train,Y_train)
+
+pred_val = model.predict(X_val)
+print(f'mean squared error: {mean_squared_error(Y_val, pred_val)}')
+
+model.print_coefficients()
+print(Y_val)
+print('----------------------------------------------')
+print(pred_val)
+
+# Barrido de lambdas para mejor MSE
+
+# Range of L2 values to test
+l2_values = np.logspace(-4, 2, 50)  # From 10^-4 to 10^2
+
+# Store coefficients for each L2 value
+ecms = []
+
+# Train the model for each L2 value (L1 = 0)
+for l2 in l2_values:
+    model = LinearRegressionn(method='pseudo_inverse', learning_rate=0.01, epochs=1000, L1=0.0, L2=l2)
+    model.fit(X_train,Y_train)
+    pred_val = model.predict(X_val)
+    ecms.append(mean_squared_error(Y_val, pred_val))
+
+# Convert coefficients to a NumPy array for plotting
+ecms = np.array(ecms)
+
+# Plot the coefficients vs. L2
+plt.figure(figsize=(10, 6))
+for i, feature_name in enumerate(model.feature_names):
+    plt.plot(l2_values, ecms[:, i], label=feature_name)
 
 
 # Regresion with L1
@@ -572,21 +609,21 @@ Y_val = df_val['price']
 l1_values = np.logspace(-4, 2, 50)  # From 10^-4 to 10^2
 
 # Store coefficients for each L1 value
-coefficients = []
+ecms = []
 
 # Train the model for each L1 value (L1 = 0)
 for l1 in l1_values:
     model = LinearRegressionn(method='gradient_descent', learning_rate=0.01, epochs=1000, L1=l1, L2=0.0)
     model.fit(X_train,Y_train)
-    coefficients.append(model.coef)
+    ecms.append(model.coef)
 
 # Convert coefficients to a NumPy array for plotting
-coefficients = np.array(coefficients)
+ecms = np.array(ecms)
 
 # Plot the coefficients vs. L1
 plt.figure(figsize=(10, 6))
 for i, feature_name in enumerate(model.feature_names):
-    plt.plot(l1_values, coefficients[:, i], label=feature_name)
+    plt.plot(l1_values, ecms[:, i], label=feature_name)
 
 plt.xscale('log')
 plt.xlabel('L1 Regularization Coefficient (L1)')
@@ -595,6 +632,29 @@ plt.title('Optimal Weights vs. L1 Regularization Coefficient')
 plt.legend()
 plt.grid(True)
 plt.show()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -704,12 +764,12 @@ X = df.drop(columns=['price'])
 Y = df['price']
 
 
-cv_results = cross_validate_linear_regression(
-    X, Y,
-    k=5,
-    method='gradient_descent',
-    learning_rate=0.01,
-    epochs=1000,
-    L1=0.1,
-    L2=0.1
-)
+# cv_results = cross_validate_linear_regression(
+#     X, Y,
+#     k=5,
+#     method='gradient_descent',
+#     learning_rate=0.01,
+#     epochs=1000,
+#     L1=0.1,
+#     L2=0.1
+# )
