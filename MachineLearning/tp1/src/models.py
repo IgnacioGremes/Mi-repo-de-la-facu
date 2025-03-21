@@ -552,3 +552,164 @@ plt.title('Optimal Weights vs. L2 Regularization Coefficient')
 plt.legend()
 plt.grid(True)
 plt.show()
+
+
+# Regresion with L1
+
+file_path = 'MachineLearning/tp1/data/processed/normalized_own_featured_train_casas_dev.csv'
+df = pd.read_csv(file_path)
+X_train = df.drop(columns=['price'])
+Y_train = df['price']
+
+# Read own featured validation file
+
+file_path = 'MachineLearning/tp1/data/processed/normalized_own_featured_val_casas_dev.csv'
+df_val = pd.read_csv(file_path)
+X_val = df_val.drop(columns=['price'])
+Y_val = df_val['price']
+
+# Range of L1 values to test
+l1_values = np.logspace(-4, 2, 50)  # From 10^-4 to 10^2
+
+# Store coefficients for each L1 value
+coefficients = []
+
+# Train the model for each L1 value (L1 = 0)
+for l1 in l1_values:
+    model = LinearRegressionn(method='gradient_descent', learning_rate=0.01, epochs=1000, L1=l1, L2=0.0)
+    model.fit(X_train,Y_train)
+    coefficients.append(model.coef)
+
+# Convert coefficients to a NumPy array for plotting
+coefficients = np.array(coefficients)
+
+# Plot the coefficients vs. L1
+plt.figure(figsize=(10, 6))
+for i, feature_name in enumerate(model.feature_names):
+    plt.plot(l1_values, coefficients[:, i], label=feature_name)
+
+plt.xscale('log')
+plt.xlabel('L1 Regularization Coefficient (L1)')
+plt.ylabel('Coefficient Value (w*)')
+plt.title('Optimal Weights vs. L1 Regularization Coefficient')
+plt.legend()
+plt.grid(True)
+plt.show()
+
+
+
+
+def cross_validate_linear_regression(X, y, k=5, method='gradient_descent', learning_rate=0.01, epochs=1000, L1=0.0, L2=0.0):
+    """
+    Perform k-fold cross-validation on a dataset using the LinearRegressionn class, without sklearn.
+    
+    Parameters:
+    X (numpy.ndarray or pandas.DataFrame): Feature matrix of shape (n_samples, n_features)
+    y (numpy.ndarray or pandas.Series): Target vector of shape (n_samples,)
+    k (int): Number of folds for cross-validation (default 5)
+    method (str): Training method for LinearRegressionn ('gradient_descent' or 'pseudo_inverse')
+    learning_rate (float): Learning rate for gradient descent
+    epochs (int): Number of iterations for gradient descent
+    L1 (float): L1 regularization coefficient
+    L2 (float): L2 regularization coefficient
+    
+    Returns:
+    dict: A dictionary containing:
+        - 'mean_mse': Average MSE across all folds
+        - 'mse_scores': List of MSE scores for each fold
+        - 'models': List of trained LinearRegressionn models for each fold
+    """
+    # Convert X and y to NumPy arrays if they are pandas objects
+    if isinstance(X, pd.DataFrame):
+        X = X.values
+    if isinstance(y, pd.Series):
+        y = y.values
+
+    # Ensure y is 1D
+    y = y.flatten()
+
+    # Get the number of samples
+    n_samples = X.shape[0]
+
+    # Shuffle the indices
+    indices = np.arange(n_samples)
+    np.random.seed(42)  # For reproducibility
+    np.random.shuffle(indices)
+
+    # Calculate the size of each fold
+    fold_size = n_samples // k
+    fold_sizes = [fold_size] * k
+    remaining = n_samples % k
+    for i in range(remaining):
+        fold_sizes[i] += 1  # Distribute the remaining samples
+
+    # Initialize lists to store results
+    mse_scores = []
+    models = []
+
+    # Perform k-fold cross-validation
+    start_idx = 0
+    for fold in range(k):
+        # Determine the test indices for this fold
+        test_size = fold_sizes[fold]
+        test_idx = indices[start_idx:start_idx + test_size]
+        train_idx = np.concatenate([indices[:start_idx], indices[start_idx + test_size:]])
+
+        # Split the data into training and test sets for this fold
+        X_train, X_test = X[train_idx], X[test_idx]
+        y_train, y_test = y[train_idx], y[test_idx]
+
+        # Convert to pandas DataFrame if X was originally a DataFrame (optional)
+        if isinstance(X, pd.DataFrame):
+            X_train = pd.DataFrame(X_train, columns=X.columns)
+            X_test = pd.DataFrame(X_test, columns=X.columns)
+
+        # Initialize and train the model on the training set
+        model = LinearRegressionn(
+            X_train, y_train,
+            method=method,
+            learning_rate=learning_rate,
+            epochs=epochs,
+            L1=L1,
+            L2=L2
+        )
+
+        # Make predictions on the test set
+        y_pred = model.predict(X_test)
+
+        # Compute MSE for this fold
+        mse = model.mean_squared_error(y_test, y_pred)
+        mse_scores.append(mse)
+        models.append(model)
+
+        print(f"Fold {fold + 1}/{k} - Test MSE: {mse:.4f}")
+
+        # Update the start index for the next fold
+        start_idx += test_size
+
+    # Compute the average MSE across all folds
+    mean_mse = np.mean(mse_scores)
+    print(f"\nAverage Test MSE across {k} folds: {mean_mse:.4f}")
+
+    return {
+        'mean_mse': mean_mse,
+        'mse_scores': mse_scores,
+        'models': models
+    }
+
+
+file_path = 'MachineLearning/tp1/data/processed/cleaned_casas_dev.csv'
+df = pd.read_csv(file_path)
+X = df.drop(columns=['price'])
+Y = df['price']
+
+
+cv_results = cross_validate_linear_regression(
+    X, Y,
+    k=5,
+    method='gradient_descent',
+    learning_rate=0.01,
+    epochs=1000,
+    L1=0.1,
+    L2=0.1
+)
