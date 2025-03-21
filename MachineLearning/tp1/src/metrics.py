@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-import seaborn as sb
+# import seaborn as sb
 
 
 #/home/ig/Desktop/prueba/MachineLearning/tp1/data/raw/casas_dev.csv

@@ -529,21 +529,21 @@ df_amanda = pd.read_csv(file_path)
 l2_values = np.logspace(-4, 2, 50)  # From 10^-4 to 10^2
 # l2_values = [-3,-2,-1,1,2,3,4,5,6,7,8,9,10]
 # Store coefficients for each L2 value
-ecms = []
+coefficients = []
 
 # Train the model for each L2 value (L1 = 0)
 for l2 in l2_values:
     model = LinearRegressionn(method='pseudo_inverse', learning_rate=0.01, epochs=1000, L1=0.0, L2=l2)
     model.fit(X_train,Y_train)
-    ecms.append(model.coef)
+    coefficients.append(model.coef)
 
 # Convert coefficients to a NumPy array for plotting
-ecms = np.array(ecms)
+coefficients = np.array(coefficients)
 
 # Plot the coefficients vs. L2
 plt.figure(figsize=(10, 6))
 for i, feature_name in enumerate(model.feature_names):
-    plt.plot(l2_values, ecms[:, i], label=feature_name)
+    plt.plot(l2_values, coefficients[:, i], label=feature_name)
 
 plt.xscale('log')
 plt.xlabel('L2 Regularization Coefficient (L2)')
@@ -582,13 +582,20 @@ for l2 in l2_values:
     pred_val = model.predict(X_val)
     ecms.append(mean_squared_error(Y_val, pred_val))
 
-# Convert coefficients to a NumPy array for plotting
-ecms = np.array(ecms)
 
 # Plot the coefficients vs. L2
 plt.figure(figsize=(10, 6))
-for i, feature_name in enumerate(model.feature_names):
-    plt.plot(l2_values, ecms[:, i], label=feature_name)
+# for i, feature_name in enumerate(model.feature_names):
+plt.plot(l2_values, ecms)
+
+# plt.xscale('log')
+plt.xlabel('L2 Regularization Coefficient (L2)')
+plt.ylabel('Error Cuadratico Medio (ECM)')
+# plt.title('Optimal Weights vs. L2 Regularization Coefficient')
+plt.legend()
+plt.grid(True)
+plt.show()
+
 
 
 # Regresion with L1
@@ -686,7 +693,7 @@ def cross_validate_linear_regression(X, y, k=5, method='gradient_descent', learn
         y = y.values
 
     # Ensure y is 1D
-    y = y.flatten()
+    # y = y.flatten()
 
     # Get the number of samples
     n_samples = X.shape[0]
@@ -716,17 +723,16 @@ def cross_validate_linear_regression(X, y, k=5, method='gradient_descent', learn
         train_idx = np.concatenate([indices[:start_idx], indices[start_idx + test_size:]])
 
         # Split the data into training and test sets for this fold
-        X_train, X_test = X[train_idx], X[test_idx]
-        y_train, y_test = y[train_idx], y[test_idx]
+        X_train, X_val = X[train_idx], X[test_idx]
+        y_train, y_val = y[train_idx], y[test_idx]
 
         # Convert to pandas DataFrame if X was originally a DataFrame (optional)
         if isinstance(X, pd.DataFrame):
             X_train = pd.DataFrame(X_train, columns=X.columns)
-            X_test = pd.DataFrame(X_test, columns=X.columns)
+            X_val = pd.DataFrame(X_val, columns=X.columns)
 
         # Initialize and train the model on the training set
         model = LinearRegressionn(
-            X_train, y_train,
             method=method,
             learning_rate=learning_rate,
             epochs=epochs,
@@ -734,11 +740,12 @@ def cross_validate_linear_regression(X, y, k=5, method='gradient_descent', learn
             L2=L2
         )
 
+        model.fit(X_train,y_train)
         # Make predictions on the test set
-        y_pred = model.predict(X_test)
+        y_pred = model.predict(X_val)
 
         # Compute MSE for this fold
-        mse = model.mean_squared_error(y_test, y_pred)
+        mse = model.mean_squared_error(y_val, y_pred)
         mse_scores.append(mse)
         models.append(model)
 
@@ -761,15 +768,35 @@ def cross_validate_linear_regression(X, y, k=5, method='gradient_descent', learn
 file_path = 'MachineLearning/tp1/data/processed/cleaned_casas_dev.csv'
 df = pd.read_csv(file_path)
 X = df.drop(columns=['price'])
+X = X.drop(columns=['area_units'])
 Y = df['price']
 
 
-# cv_results = cross_validate_linear_regression(
-#     X, Y,
-#     k=5,
-#     method='gradient_descent',
-#     learning_rate=0.01,
-#     epochs=1000,
-#     L1=0.1,
-#     L2=0.1
-# )
+l2_values = np.logspace(-4, 2, 50)  # From 10^-4 to 10^2
+
+ecms = []
+
+for l2 in l2_values:
+    cv_results = cross_validate_linear_regression(
+        X, Y,
+        k=5,
+        method='pseudo_inverse',
+        learning_rate=0.01,
+        epochs=1000,
+        L1=0.0,
+        L2=l2
+    )
+    ecms.append(cv_results['mean_mse'])
+
+# Plot the coefficients vs. L2
+plt.figure(figsize=(10, 6))
+# for i, feature_name in enumerate(model.feature_names):
+plt.plot(l2_values, ecms)
+
+# plt.xscale('log')
+plt.xlabel('L2 Regularization Coefficient (L2)')
+plt.ylabel('Error Cuadratico Medio (ECM)')
+# plt.title('Optimal Weights vs. L2 Regularization Coefficient')
+# plt.legend()
+plt.grid(True)
+plt.show()
