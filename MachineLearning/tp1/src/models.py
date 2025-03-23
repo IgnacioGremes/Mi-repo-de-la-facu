@@ -1,8 +1,7 @@
 import numpy as np
 import pandas as pd
-from preprocessing import normalize
-from metrics import mean_squared_error
-from sklearn.linear_model import LinearRegression
+# from preprocessing import normalize
+# from metrics import mean_squared_error
 
 # class LinearRegression:
 #     def __init__(self, X, y, normalization='min-max'):
@@ -261,7 +260,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
-class LinearRegressionn:
+class LinearRegression:
     def __init__(self, method='gradient_descent', learning_rate=0.01, epochs=1000, L1=0.0, L2=0.0):
         """
         Initialize the linear regression model with L1 and L2 regularization.
@@ -289,11 +288,11 @@ class LinearRegressionn:
         if isinstance(X, pd.DataFrame):
             feature_names = list(X.columns)
         else:
+            feature_names = [X.name]
             if hasattr(X, 'values'):
                 X = X.values
             if X.ndim == 1:
                 X = X.reshape(-1, 1)
-            feature_names = [f'feature_{i}' for i in range(X.shape[1])]
 
         if hasattr(y, 'values'):
             y = y.values
@@ -361,8 +360,8 @@ class LinearRegressionn:
                 print(f"{name}: {coef:.4f}")
     
     def mean_squared_error(self, y_true, y_pred):
-        y_true = y_true.flatten()
-        y_pred = y_pred.flatten()
+        # y_true = y_true.flatten()
+        # y_pred = y_pred.flatten()
         n = len(y_true)
         mse = np.mean((y_true - y_pred) ** 2)
         return mse
@@ -370,72 +369,72 @@ class LinearRegressionn:
 
 
 
-    
-# hacer los validation y medir el mean squared error
+if __name__ == '__main__':    
+    # hacer los validation y medir el mean squared error
 
-# Read train file
+    # Read train file
 
-file_path = 'MachineLearning/tp1/data/processed/train_cleaned_casas_dev.csv'
-df_train = pd.read_csv(file_path)
-X_train = df_train.drop(columns=['price'])
-Y_train = df_train['price']
+    file_path = 'MachineLearning/tp1/data/processed/train_cleaned_casas_dev.csv'
+    df_train = pd.read_csv(file_path)
+    X_train = df_train.drop(columns=['price'])
+    Y_train = df_train['price']
 
-# Read validation file
+    # Read validation file
 
-file_path = 'MachineLearning/tp1/data/processed/val_cleaned_casas_dev.csv'
-df_val = pd.read_csv(file_path)
-X_val = df_val.drop(columns=['price'])
-Y_val = df_val['price']
+    file_path = 'MachineLearning/tp1/data/processed/val_cleaned_casas_dev.csv'
+    df_val = pd.read_csv(file_path)
+    X_val = df_val.drop(columns=['price'])
+    Y_val = df_val['price']
 
-# Read amanda file
+    # Read amanda file
 
-file_path = 'MachineLearning/tp1/data/processed/cleaned_Amanda.csv'
-df_amanda = pd.read_csv(file_path)
+    file_path = 'MachineLearning/tp1/data/processed/cleaned_Amanda.csv'
+    df_amanda = pd.read_csv(file_path)
 
-# Regresion with only area
+    # Regresion with only area
 
-regresion = LinearRegressionn(method='pseudo_inverse')
-regresion.fit(X_train['area'],Y_train)
-print('')
+    regresion = LinearRegression(method='pseudo_inverse')
+    regresion.fit(X_train['area'],Y_train)
+    print('')
 
-regresion.print_coefficients()
+    regresion.print_coefficients()
 
-pred_val = regresion.predict(X_val['area'])
-print(f'mean squared error: {mean_squared_error(Y_val, pred_val)}')
-print(Y_val)
-print('----------------------------------------------')
-print(pred_val)
+    pred_val = regresion.predict(X_val['area'])
+    print(f'mean squared error: {regresion.mean_squared_error(Y_val, pred_val)}')
+    print(Y_val)
+    print('----------------------------------------------')
+    print(pred_val)
 
-pred_amanda = regresion.predict(df_amanda['area'])
-print(pred_amanda)
+    pred_amanda = regresion.predict(df_amanda['area'])
+    print(pred_amanda)
 
 
-# print('Resultados de sklearn')
-# reg = LinearRegression().fit(X_train['area'].to_frame(),Y_train)
-# print(reg.score(X_val['area'].to_frame(),Y_val))
+    # print('Resultados de sklearn')
+    # reg = LinearRegression().fit(X_train['area'].to_frame(),Y_train)
+    # print(reg.score(X_val['area'].to_frame(),Y_val))
 
-# print(reg.predict(df_amanda['area'].to_frame()))
+    # print(reg.predict(df_amanda['area'].to_frame()))
 
 
 
 
 
-# Regresion
+    # Regresion
 
-regresion = LinearRegressionn(method='pseudo_inverse')
-regresion.fit(X_train,Y_train)
-print('')
+    regresion = LinearRegression(method='pseudo_inverse')
+    regresion.fit(X_train,Y_train)
+    print('')
 
-regresion.print_coefficients()
+    regresion.print_coefficients()
 
-pred_val = regresion.predict(X_val)
-print(f'mean squared error: {mean_squared_error(Y_val, pred_val)}')
-print(Y_val)
-print('----------------------------------------------')
-print(pred_val)
+    pred_val = regresion.predict(X_val)
+    print(f'mean squared error: {regresion.mean_squared_error(Y_val, pred_val)}')
+    print(Y_val)
+    print('----------------------------------------------')
+    print(pred_val)
 
-pred_amanda = regresion.predict(df_amanda)
-print(pred_amanda)
+    pred_amanda = regresion.predict(df_amanda)
+    print(pred_amanda)
 
 
 
@@ -445,358 +444,358 @@ print(pred_amanda)
 
 
 
-# Read own featured train file
+    # Read own featured train file
 
-file_path = 'MachineLearning/tp1/data/processed/own_featured_train_casas_dev.csv'
-df = pd.read_csv(file_path)
-X_train = df.drop(columns=['price'])
-Y_train = df['price']
+    file_path = 'MachineLearning/tp1/data/processed/own_featured_train_casas_dev.csv'
+    df = pd.read_csv(file_path)
+    X_train = df.drop(columns=['price'])
+    Y_train = df['price']
 
-# Read own featured validation file
+    # Read own featured validation file
 
-file_path = 'MachineLearning/tp1/data/processed/own_featured_val_casas_dev.csv'
-df_val = pd.read_csv(file_path)
-X_val = df_val.drop(columns=['price'])
-Y_val = df_val['price']
+    file_path = 'MachineLearning/tp1/data/processed/own_featured_val_casas_dev.csv'
+    df_val = pd.read_csv(file_path)
+    X_val = df_val.drop(columns=['price'])
+    Y_val = df_val['price']
 
-# Read own featured amanda file
+    # Read own featured amanda file
 
-file_path = 'MachineLearning/tp1/data/processed/own_featured_Amanda.csv'
-df_amanda = pd.read_csv(file_path)
+    file_path = 'MachineLearning/tp1/data/processed/own_featured_Amanda.csv'
+    df_amanda = pd.read_csv(file_path)
 
 
-# Regresion with own features
+    # Regresion with own features
 
-regresion = LinearRegressionn(method='pseudo_inverse')
-regresion.fit(X_train,Y_train)
+    regresion = LinearRegression(method='pseudo_inverse')
+    regresion.fit(X_train,Y_train)
 
-regresion.print_coefficients()
+    regresion.print_coefficients()
 
-pred_val = regresion.predict(X_val)
-print(f'mean squared error: {mean_squared_error(Y_val, pred_val)}')
-print(Y_val)
-print('----------------------------------------------')
-print(pred_val)
+    pred_val = regresion.predict(X_val)
+    print(f'mean squared error: {regresion.mean_squared_error(Y_val, pred_val)}')
+    print(Y_val)
+    print('----------------------------------------------')
+    print(pred_val)
 
-pred_amanda = regresion.predict(df_amanda)
-print(pred_amanda)
+    pred_amanda = regresion.predict(df_amanda)
+    print(pred_amanda)
 
 
 
-# Regresion with exponential features
+    # Regresion with exponential features
 
-# file_path = 'MachineLearning/tp1/data/processed/exponential_featured_train_casas_dev.csv'
-# df = pd.read_csv(file_path)
+    # file_path = 'MachineLearning/tp1/data/processed/exponential_featured_train_casas_dev.csv'
+    # df = pd.read_csv(file_path)
 
-# file_path = 'MachineLearning/tp1/data/processed/exponential_featured_Amanda.csv'
-# df_pred = pd.read_csv(file_path)
+    # file_path = 'MachineLearning/tp1/data/processed/exponential_featured_Amanda.csv'
+    # df_pred = pd.read_csv(file_path)
 
-# X = df.drop(columns=['price'])
-# Y = df['price']
+    # X = df.drop(columns=['price'])
+    # Y = df['price']
 
-# regresion = LinearRegression(method='pseudo_inverse')
-# regresion.fit(X,Y)
+    # regresion = LinearRegression(method='pseudo_inverse')
+    # regresion.fit(X,Y)
 
-# regresion.print_coefficients()
+    # regresion.print_coefficients()
 
-# print(regresion.predict(df_pred))
+    # print(regresion.predict(df_pred))
 
 
 
 
-# Regresion with L2
+    # Regresion with L2
 
-# Read own featured train file
+    # Read own featured train file
 
-file_path = 'MachineLearning/tp1/data/processed/own_featured_train_casas_dev.csv'
-df = pd.read_csv(file_path)
-X_train = df.drop(columns=['price'])
-Y_train = df['price']
+    file_path = 'MachineLearning/tp1/data/processed/own_featured_train_casas_dev.csv'
+    df = pd.read_csv(file_path)
+    X_train = df.drop(columns=['price'])
+    Y_train = df['price']
 
-# Read own featured validation file
+    # Read own featured validation file
 
-file_path = 'MachineLearning/tp1/data/processed/own_featured_val_casas_dev.csv'
-df_val = pd.read_csv(file_path)
-X_val = df_val.drop(columns=['price'])
-Y_val = df_val['price']
+    file_path = 'MachineLearning/tp1/data/processed/own_featured_val_casas_dev.csv'
+    df_val = pd.read_csv(file_path)
+    X_val = df_val.drop(columns=['price'])
+    Y_val = df_val['price']
 
-# Read own featured amanda file
+    # Read own featured amanda file
 
-file_path = 'MachineLearning/tp1/data/processed/own_featured_Amanda.csv'
-df_amanda = pd.read_csv(file_path)
+    file_path = 'MachineLearning/tp1/data/processed/own_featured_Amanda.csv'
+    df_amanda = pd.read_csv(file_path)
 
-# Range of L2 values to test
-l2_values = np.logspace(-4, 2, 50)  # From 10^-4 to 10^2
-# l2_values = [-3,-2,-1,1,2,3,4,5,6,7,8,9,10]
-# Store coefficients for each L2 value
-coefficients = []
+    # Range of L2 values to test
+    l2_values = np.logspace(-4, 2, 50)  # From 10^-4 to 10^2
+    # l2_values = [-3,-2,-1,1,2,3,4,5,6,7,8,9,10]
+    # Store coefficients for each L2 value
+    coefficients = []
 
-# Train the model for each L2 value (L1 = 0)
-for l2 in l2_values:
-    model = LinearRegressionn(method='pseudo_inverse', learning_rate=0.01, epochs=1000, L1=0.0, L2=l2)
+    # Train the model for each L2 value (L1 = 0)
+    for l2 in l2_values:
+        model = LinearRegression(method='pseudo_inverse', learning_rate=0.01, epochs=1000, L1=0.0, L2=l2)
+        model.fit(X_train,Y_train)
+        coefficients.append(model.coef)
+
+    # Convert coefficients to a NumPy array for plotting
+    coefficients = np.array(coefficients)
+
+    # Plot the coefficients vs. L2
+    plt.figure(figsize=(10, 6))
+    for i, feature_name in enumerate(model.feature_names):
+        plt.plot(l2_values, coefficients[:, i], label=feature_name)
+
+    plt.xscale('log')
+    plt.xlabel('L2 Regularization Coefficient (L2)')
+    plt.ylabel('Coefficient Value (w*)')
+    plt.title('Optimal Weights vs. L2 Regularization Coefficient')
+    plt.legend()
+    plt.grid(True)
+    plt.show()
+
+    # Elegir lambda fundamentado
+    print('')
+    print('Elegir lambda')
+    model = LinearRegression(method='pseudo_inverse', learning_rate=0.01, epochs=1000, L1=0.0, L2=6)
     model.fit(X_train,Y_train)
-    coefficients.append(model.coef)
 
-# Convert coefficients to a NumPy array for plotting
-coefficients = np.array(coefficients)
-
-# Plot the coefficients vs. L2
-plt.figure(figsize=(10, 6))
-for i, feature_name in enumerate(model.feature_names):
-    plt.plot(l2_values, coefficients[:, i], label=feature_name)
-
-plt.xscale('log')
-plt.xlabel('L2 Regularization Coefficient (L2)')
-plt.ylabel('Coefficient Value (w*)')
-plt.title('Optimal Weights vs. L2 Regularization Coefficient')
-plt.legend()
-plt.grid(True)
-plt.show()
-
-# Elegir lambda fundamentado
-print('')
-print('Elegir lambda')
-model = LinearRegressionn(method='pseudo_inverse', learning_rate=0.01, epochs=1000, L1=0.0, L2=6)
-model.fit(X_train,Y_train)
-
-pred_val = model.predict(X_val)
-print(f'mean squared error: {mean_squared_error(Y_val, pred_val)}')
-
-model.print_coefficients()
-print(Y_val)
-print('----------------------------------------------')
-print(pred_val)
-
-# Barrido de lambdas para mejor MSE
-
-# Range of L2 values to test
-l2_values = np.logspace(-4, 2, 50)  # From 10^-4 to 10^2
-
-# Store coefficients for each L2 value
-ecms = []
-
-# Train the model for each L2 value (L1 = 0)
-for l2 in l2_values:
-    model = LinearRegressionn(method='pseudo_inverse', learning_rate=0.01, epochs=1000, L1=0.0, L2=l2)
-    model.fit(X_train,Y_train)
     pred_val = model.predict(X_val)
-    ecms.append(mean_squared_error(Y_val, pred_val))
+    print(f'mean squared error: {model.mean_squared_error(Y_val, pred_val)}')
+
+    model.print_coefficients()
+    print(Y_val)
+    print('----------------------------------------------')
+    print(pred_val)
+
+    # Barrido de lambdas para mejor MSE
+
+    # Range of L2 values to test
+    l2_values = np.logspace(-4, 2, 50)  # From 10^-4 to 10^2
+
+    # Store coefficients for each L2 value
+    ecms = []
+
+    # Train the model for each L2 value (L1 = 0)
+    for l2 in l2_values:
+        model = LinearRegression(method='pseudo_inverse', learning_rate=0.01, epochs=1000, L1=0.0, L2=l2)
+        model.fit(X_train,Y_train)
+        pred_val = model.predict(X_val)
+        ecms.append(model.mean_squared_error(Y_val, pred_val))
 
 
-# Plot the coefficients vs. L2
-plt.figure(figsize=(10, 6))
-# for i, feature_name in enumerate(model.feature_names):
-plt.plot(l2_values, ecms)
+    # Plot the coefficients vs. L2
+    plt.figure(figsize=(10, 6))
+    # for i, feature_name in enumerate(model.feature_names):
+    plt.plot(l2_values, ecms)
 
-# plt.xscale('log')
-plt.xlabel('L2 Regularization Coefficient (L2)')
-plt.ylabel('Error Cuadratico Medio (ECM)')
-# plt.title('Optimal Weights vs. L2 Regularization Coefficient')
-plt.legend()
-plt.grid(True)
-plt.show()
-
-
-
-# Regresion with L1
-
-file_path = 'MachineLearning/tp1/data/processed/normalized_own_featured_train_casas_dev.csv'
-df = pd.read_csv(file_path)
-X_train = df.drop(columns=['price'])
-Y_train = df['price']
-
-# Read own featured validation file
-
-file_path = 'MachineLearning/tp1/data/processed/normalized_own_featured_val_casas_dev.csv'
-df_val = pd.read_csv(file_path)
-X_val = df_val.drop(columns=['price'])
-Y_val = df_val['price']
-
-# Range of L1 values to test
-l1_values = np.logspace(-4, 2, 50)  # From 10^-4 to 10^2
-
-# Store coefficients for each L1 value
-ecms = []
-
-# Train the model for each L1 value (L1 = 0)
-for l1 in l1_values:
-    model = LinearRegressionn(method='gradient_descent', learning_rate=0.01, epochs=1000, L1=l1, L2=0.0)
-    model.fit(X_train,Y_train)
-    ecms.append(model.coef)
-
-# Convert coefficients to a NumPy array for plotting
-ecms = np.array(ecms)
-
-# Plot the coefficients vs. L1
-plt.figure(figsize=(10, 6))
-for i, feature_name in enumerate(model.feature_names):
-    plt.plot(l1_values, ecms[:, i], label=feature_name)
-
-plt.xscale('log')
-plt.xlabel('L1 Regularization Coefficient (L1)')
-plt.ylabel('Coefficient Value (w*)')
-plt.title('Optimal Weights vs. L1 Regularization Coefficient')
-plt.legend()
-plt.grid(True)
-plt.show()
+    plt.xscale('log')
+    plt.xlabel('L2 Regularization Coefficient (L2)')
+    plt.ylabel('Error Cuadratico Medio (ECM)')
+    # plt.title('Optimal Weights vs. L2 Regularization Coefficient')
+    plt.legend()
+    plt.grid(True)
+    plt.show()
 
 
 
+    # Regresion with L1
 
+    file_path = 'MachineLearning/tp1/data/processed/normalized_own_featured_train_casas_dev.csv'
+    df = pd.read_csv(file_path)
+    X_train = df.drop(columns=['price'])
+    Y_train = df['price']
 
+    # Read own featured validation file
 
+    file_path = 'MachineLearning/tp1/data/processed/normalized_own_featured_val_casas_dev.csv'
+    df_val = pd.read_csv(file_path)
+    X_val = df_val.drop(columns=['price'])
+    Y_val = df_val['price']
 
+    # Range of L1 values to test
+    l1_values = np.logspace(-4, 2, 50)  # From 10^-4 to 10^2
 
+    # Store coefficients for each L1 value
+    ecms = []
 
+    # Train the model for each L1 value (L1 = 0)
+    for l1 in l1_values:
+        model = LinearRegression(method='gradient_descent', learning_rate=0.01, epochs=1000, L1=l1, L2=0.0)
+        model.fit(X_train,Y_train)
+        ecms.append(model.coef)
 
+    # Convert coefficients to a NumPy array for plotting
+    ecms = np.array(ecms)
 
+    # Plot the coefficients vs. L1
+    plt.figure(figsize=(10, 6))
+    for i, feature_name in enumerate(model.feature_names):
+        plt.plot(l1_values, ecms[:, i], label=feature_name)
 
-
-
-
-
-
-
-
-
-
-
-
+    plt.xscale('log')
+    plt.xlabel('L1 Regularization Coefficient (L1)')
+    plt.ylabel('Coefficient Value (w*)')
+    plt.title('Optimal Weights vs. L1 Regularization Coefficient')
+    plt.legend()
+    plt.grid(True)
+    plt.show()
 
 
 
 
-def cross_validate_linear_regression(X, y, k=5, method='gradient_descent', learning_rate=0.01, epochs=1000, L1=0.0, L2=0.0):
-    """
-    Perform k-fold cross-validation on a dataset using the LinearRegressionn class, without sklearn.
-    
-    Parameters:
-    X (numpy.ndarray or pandas.DataFrame): Feature matrix of shape (n_samples, n_features)
-    y (numpy.ndarray or pandas.Series): Target vector of shape (n_samples,)
-    k (int): Number of folds for cross-validation (default 5)
-    method (str): Training method for LinearRegressionn ('gradient_descent' or 'pseudo_inverse')
-    learning_rate (float): Learning rate for gradient descent
-    epochs (int): Number of iterations for gradient descent
-    L1 (float): L1 regularization coefficient
-    L2 (float): L2 regularization coefficient
-    
-    Returns:
-    dict: A dictionary containing:
-        - 'mean_mse': Average MSE across all folds
-        - 'mse_scores': List of MSE scores for each fold
-        - 'models': List of trained LinearRegressionn models for each fold
-    """
-    # Convert X and y to NumPy arrays if they are pandas objects
-    if isinstance(X, pd.DataFrame):
-        X = X.values
-    if isinstance(y, pd.Series):
-        y = y.values
 
-    # Ensure y is 1D
-    # y = y.flatten()
 
-    # Get the number of samples
-    n_samples = X.shape[0]
 
-    # Shuffle the indices
-    indices = np.arange(n_samples)
-    np.random.seed(42)  # For reproducibility
-    np.random.shuffle(indices)
 
-    # Calculate the size of each fold
-    fold_size = n_samples // k
-    fold_sizes = [fold_size] * k
-    remaining = n_samples % k
-    for i in range(remaining):
-        fold_sizes[i] += 1  # Distribute the remaining samples
 
-    # Initialize lists to store results
-    mse_scores = []
-    models = []
 
-    # Perform k-fold cross-validation
-    start_idx = 0
-    for fold in range(k):
-        # Determine the test indices for this fold
-        test_size = fold_sizes[fold]
-        test_idx = indices[start_idx:start_idx + test_size]
-        train_idx = np.concatenate([indices[:start_idx], indices[start_idx + test_size:]])
 
-        # Split the data into training and test sets for this fold
-        X_train, X_val = X[train_idx], X[test_idx]
-        y_train, y_val = y[train_idx], y[test_idx]
 
-        # Convert to pandas DataFrame if X was originally a DataFrame (optional)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    def cross_validate_linear_regression(X, y, k=5, method='gradient_descent', learning_rate=0.01, epochs=1000, L1=0.0, L2=0.0):
+        """
+        Perform k-fold cross-validation on a dataset using the LinearRegressionn class, without sklearn.
+        
+        Parameters:
+        X (numpy.ndarray or pandas.DataFrame): Feature matrix of shape (n_samples, n_features)
+        y (numpy.ndarray or pandas.Series): Target vector of shape (n_samples,)
+        k (int): Number of folds for cross-validation (default 5)
+        method (str): Training method for LinearRegressionn ('gradient_descent' or 'pseudo_inverse')
+        learning_rate (float): Learning rate for gradient descent
+        epochs (int): Number of iterations for gradient descent
+        L1 (float): L1 regularization coefficient
+        L2 (float): L2 regularization coefficient
+        
+        Returns:
+        dict: A dictionary containing:
+            - 'mean_mse': Average MSE across all folds
+            - 'mse_scores': List of MSE scores for each fold
+            - 'models': List of trained LinearRegressionn models for each fold
+        """
+        # Convert X and y to NumPy arrays if they are pandas objects
         if isinstance(X, pd.DataFrame):
-            X_train = pd.DataFrame(X_train, columns=X.columns)
-            X_val = pd.DataFrame(X_val, columns=X.columns)
+            X = X.values
+        if isinstance(y, pd.Series):
+            y = y.values
 
-        # Initialize and train the model on the training set
-        model = LinearRegressionn(
-            method=method,
-            learning_rate=learning_rate,
-            epochs=epochs,
-            L1=L1,
-            L2=L2
+        # Ensure y is 1D
+        # y = y.flatten()
+
+        # Get the number of samples
+        n_samples = X.shape[0]
+
+        # Shuffle the indices
+        indices = np.arange(n_samples)
+        np.random.seed(42)  # For reproducibility
+        np.random.shuffle(indices)
+
+        # Calculate the size of each fold
+        fold_size = n_samples // k
+        fold_sizes = [fold_size] * k
+        remaining = n_samples % k
+        for i in range(remaining):
+            fold_sizes[i] += 1  # Distribute the remaining samples
+
+        # Initialize lists to store results
+        mse_scores = []
+        models = []
+
+        # Perform k-fold cross-validation
+        start_idx = 0
+        for fold in range(k):
+            # Determine the test indices for this fold
+            test_size = fold_sizes[fold]
+            test_idx = indices[start_idx:start_idx + test_size]
+            train_idx = np.concatenate([indices[:start_idx], indices[start_idx + test_size:]])
+
+            # Split the data into training and test sets for this fold
+            X_train, X_val = X[train_idx], X[test_idx]
+            y_train, y_val = y[train_idx], y[test_idx]
+
+            # Convert to pandas DataFrame if X was originally a DataFrame (optional)
+            if isinstance(X, pd.DataFrame):
+                X_train = pd.DataFrame(X_train, columns=X.columns)
+                X_val = pd.DataFrame(X_val, columns=X.columns)
+
+            # Initialize and train the model on the training set
+            model = LinearRegression(
+                method=method,
+                learning_rate=learning_rate,
+                epochs=epochs,
+                L1=L1,
+                L2=L2
+            )
+
+            model.fit(X_train,y_train)
+            # Make predictions on the test set
+            y_pred = model.predict(X_val)
+
+            # Compute MSE for this fold
+            mse = model.mean_squared_error(y_val, y_pred)
+            mse_scores.append(mse)
+            models.append(model)
+
+            print(f"Fold {fold + 1}/{k} - Test MSE: {mse:.4f}")
+
+            # Update the start index for the next fold
+            start_idx += test_size
+
+        # Compute the average MSE across all folds
+        mean_mse = np.mean(mse_scores)
+        print(f"\nAverage Test MSE across {k} folds: {mean_mse:.4f}")
+
+        return {
+            'mean_mse': mean_mse,
+            'mse_scores': mse_scores,
+            'models': models
+        }
+
+
+    file_path = 'MachineLearning/tp1/data/processed/cleaned_casas_dev.csv'
+    df = pd.read_csv(file_path)
+    X = df.drop(columns=['price'])
+    # X = X.drop(columns=['area_units'])
+    Y = df['price']
+
+
+    l2_values = np.logspace(-4, 2, 50)  # From 10^-4 to 10^2
+
+    ecms = []
+
+    for l2 in l2_values:
+        cv_results = cross_validate_linear_regression(
+            X, Y,
+            k=5,
+            method='pseudo_inverse',
+            learning_rate=0.01,
+            epochs=1000,
+            L1=0.0,
+            L2=l2
         )
+        ecms.append(cv_results['mean_mse'])
 
-        model.fit(X_train,y_train)
-        # Make predictions on the test set
-        y_pred = model.predict(X_val)
+    # Plot the coefficients vs. L2
+    plt.figure(figsize=(10, 6))
+    # for i, feature_name in enumerate(model.feature_names):
+    plt.plot(l2_values, ecms)
 
-        # Compute MSE for this fold
-        mse = model.mean_squared_error(y_val, y_pred)
-        mse_scores.append(mse)
-        models.append(model)
-
-        print(f"Fold {fold + 1}/{k} - Test MSE: {mse:.4f}")
-
-        # Update the start index for the next fold
-        start_idx += test_size
-
-    # Compute the average MSE across all folds
-    mean_mse = np.mean(mse_scores)
-    print(f"\nAverage Test MSE across {k} folds: {mean_mse:.4f}")
-
-    return {
-        'mean_mse': mean_mse,
-        'mse_scores': mse_scores,
-        'models': models
-    }
-
-
-file_path = 'MachineLearning/tp1/data/processed/cleaned_casas_dev.csv'
-df = pd.read_csv(file_path)
-X = df.drop(columns=['price'])
-X = X.drop(columns=['area_units'])
-Y = df['price']
-
-
-l2_values = np.logspace(-4, 2, 50)  # From 10^-4 to 10^2
-
-ecms = []
-
-for l2 in l2_values:
-    cv_results = cross_validate_linear_regression(
-        X, Y,
-        k=5,
-        method='pseudo_inverse',
-        learning_rate=0.01,
-        epochs=1000,
-        L1=0.0,
-        L2=l2
-    )
-    ecms.append(cv_results['mean_mse'])
-
-# Plot the coefficients vs. L2
-plt.figure(figsize=(10, 6))
-# for i, feature_name in enumerate(model.feature_names):
-plt.plot(l2_values, ecms)
-
-# plt.xscale('log')
-plt.xlabel('L2 Regularization Coefficient (L2)')
-plt.ylabel('Error Cuadratico Medio (ECM)')
-# plt.title('Optimal Weights vs. L2 Regularization Coefficient')
-# plt.legend()
-plt.grid(True)
-plt.show()
+    # plt.xscale('log')
+    plt.xlabel('L2 Regularization Coefficient (L2)')
+    plt.ylabel('Error Cuadratico Medio (ECM)')
+    # plt.title('Optimal Weights vs. L2 Regularization Coefficient')
+    # plt.legend()
+    plt.grid(True)
+    plt.show()

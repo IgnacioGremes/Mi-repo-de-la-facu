@@ -1,47 +1,8 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+
 # import seaborn as sb
-
-
-#/home/ig/Desktop/prueba/MachineLearning/tp1/data/raw/casas_dev.csv
-file_path = 'MachineLearning/tp1/data/processed/cleaned_casas_dev.csv'
-df = pd.read_csv(file_path)
-
-plt.figure(figsize=(10, 5))
-
-plt.scatter(df['area'],df['price'])
-plt.xlabel('area')
-plt.ylabel('price')
-
-plt.show()
-
-plt.figure(figsize=(10, 8))
-
-plt.subplot(2,2,1)
-plt.scatter(df['age'],df['price'])
-plt.xlabel('age')
-plt.ylabel('price')
-
-plt.subplot(2,2,2)
-plt.scatter(df['age'],df['area'])
-plt.xlabel('age')
-plt.ylabel('area')
-
-plt.subplot(2,2,3)
-plt.scatter(df['rooms'],df['price'])
-plt.xlabel('rooms')
-plt.ylabel('price')
-
-plt.subplot(2,2,4)
-plt.scatter(df['rooms'],df['area'])
-plt.xlabel('rooms')
-plt.ylabel('area')
-# sb.pairplot(df)
-plt.show()
-
-# area vs precio , age vs area y age vs precio (mostrar que se parecen mucho)
-# rooms vs area, rooms vs price 
 
 def mean_squared_error(y_true, y_pred):
     """
@@ -68,7 +29,95 @@ def mean_value_per_m2(dataframe):
     mean = sum(mean_list) / dataframe.shape[0]
     return mean
 
-file_path = 'MachineLearning/tp1/data/processed/train_cleaned_casas_dev.csv'
-df1 = pd.read_csv(file_path)
+def mean_absolute_error(y_true, y_pred):
+    """
+    Calculate the Mean Absolute Error (MAE) between actual and predicted values.
+    
+    Parameters:
+    y_true (array-like): Actual values.
+    y_pred (array-like): Predicted values.
+    
+    Returns:
+    float: The MAE value.
+    """
+    # Convert inputs to NumPy arrays for efficient computation
+    y_true = np.array(y_true)
+    y_pred = np.array(y_pred)
+    
+    # Check if the lengths match
+    if len(y_true) != len(y_pred):
+        raise ValueError("The length of y_true and y_pred must be the same.")
+    
+    # Calculate MAE
+    mae = np.mean(np.abs(y_true - y_pred))
+    return mae
 
-print(mean_value_per_m2(df1))
+def root_mean_squared_error(y_true, y_pred):
+    """
+    Calculate the Root Mean Squared Error (RMSE) between actual and predicted values.
+    
+    Parameters:
+    y_true (array-like): Actual values.
+    y_pred (array-like): Predicted values.
+    
+    Returns:
+    float: The RMSE value.
+    """
+    # Convert inputs to NumPy arrays for efficient computation
+    y_true = np.array(y_true)
+    y_pred = np.array(y_pred)
+    
+    # Check if the lengths match
+    if len(y_true) != len(y_pred):
+        raise ValueError("The length of y_true and y_pred must be the same.")
+    
+    # Calculate RMSE
+    rmse = np.sqrt(np.mean((y_true - y_pred) ** 2))
+    return rmse
+
+if __name__ == '__main__':
+
+    #/home/ig/Desktop/prueba/MachineLearning/tp1/data/raw/casas_dev.csv
+    file_path = 'MachineLearning/tp1/data/processed/cleaned_casas_dev.csv'
+    df = pd.read_csv(file_path)
+
+    plt.figure(figsize=(10, 5))
+
+    plt.scatter(df['area'],df['price'])
+    plt.xlabel('area')
+    plt.ylabel('price')
+
+    plt.show()
+
+    plt.figure(figsize=(10, 8))
+
+    plt.subplot(2,2,1)
+    plt.scatter(df['age'],df['price'])
+    plt.xlabel('age')
+    plt.ylabel('price')
+
+    plt.subplot(2,2,2)
+    plt.scatter(df['age'],df['area'])
+    plt.xlabel('age')
+    plt.ylabel('area')
+
+    plt.subplot(2,2,3)
+    plt.scatter(df['rooms'],df['price'])
+    plt.xlabel('rooms')
+    plt.ylabel('price')
+
+    plt.subplot(2,2,4)
+    plt.scatter(df['rooms'],df['area'])
+    plt.xlabel('rooms')
+    plt.ylabel('area')
+    # sb.pairplot(df)
+    plt.show()
+
+    # area vs precio , age vs area y age vs precio (mostrar que se parecen mucho)
+    # rooms vs area, rooms vs price 
+
+
+    file_path = 'MachineLearning/tp1/data/processed/train_cleaned_casas_dev.csv'
+    df1 = pd.read_csv(file_path)
+
+    print(mean_value_per_m2(df1))

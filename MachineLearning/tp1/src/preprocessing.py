@@ -70,72 +70,6 @@ def create_feature_age_range(dataframe):
     dataframe['age_mid'] = age_mid_list
     dataframe['age_old'] = age_old_list
             
-
-
-# before split
-
-file_path = 'MachineLearning/tp1/data/raw/casas_dev.csv'
-df = pd.read_csv(file_path)
-df = handle_nan_values(df)
-convert_area_sqft_to_m2(df)
-df.to_csv('MachineLearning/tp1/data/processed/cleaned_casas_dev.csv', index=False)
-
-# after split
-
-
-# Train clean
-
-file_path = 'MachineLearning/tp1/data/processed/train_casas_dev.csv'
-df_train = pd.read_csv(file_path)
-df_train = df_train.drop(columns=['area_units'])
-# normalize('area',df_train)
-# normalize('price',df_train)
-# normalize('age',df_train)
-# normalize('lat',df_train)
-# normalize('lon',df_train)
-# normalize('rooms',df_train)
-
-df_train.to_csv('MachineLearning/tp1/data/processed/train_cleaned_casas_dev.csv', index=False)
-
-# Own featured train
-
-# df_cleaned_own_featured = handle_nan_values(df)
-# convert_area_sqft_to_m2(df_cleaned_own_featured)
-# df_cleaned_own_featured = df_train.drop(columns=['area_units'])
-create_feature_area_per_room(df_train)
-create_feature_house_and_pool(df_train)
-create_feature_age_range(df_train)
-# normalize('area',df_cleaned_own_featured)
-# normalize('price',df_cleaned_own_featured)
-# normalize('age',df_cleaned_own_featured)
-# normalize('lat',df_cleaned_own_featured)
-# normalize('lon',df_cleaned_own_featured)
-# normalize('rooms',df_cleaned_own_featured)
-# normalize('area_per_room',df_cleaned_own_featured)
-
-df_train.to_csv('MachineLearning/tp1/data/processed/own_featured_train_casas_dev.csv', index=False)
-
-# Amanda clean
-
-file_path = 'MachineLearning/tp1/data/raw/vivienda_Amanda.csv'
-amanda_df = pd.read_csv(file_path)
-convert_area_sqft_to_m2(amanda_df)
-amanda_df = amanda_df.drop(columns=['area_units'])
-amanda_df.to_csv('MachineLearning/tp1/data/processed/cleaned_Amanda.csv', index=False)
-
-# Amanda own featured
-
-# amanda_cleaned_df = handle_nan_values(amanda_df)
-# convert_area_sqft_to_m2(amanda_cleaned_df)
-# amanda_cleaned_df = amanda_cleaned_df.drop(columns=['area_units'])
-create_feature_area_per_room(amanda_df)
-create_feature_house_and_pool(amanda_df)
-create_feature_age_range(amanda_df)
-
-amanda_df.to_csv('MachineLearning/tp1/data/processed/own_featured_Amanda.csv', index=False)
-
-# Exponential features
-
 # def expand_features(df):
 #     expanded_df = df.copy()
 #     for exp in range(2, 44):
@@ -144,70 +78,156 @@ amanda_df.to_csv('MachineLearning/tp1/data/processed/own_featured_Amanda.csv', i
 #                 expanded_df[f'{col}^{exp}'] = df[col] ** exp
 #     return expanded_df
 
-# file_path = 'MachineLearning/tp1/data/processed/train_cleaned_casas_dev.csv'
-# df = pd.read_csv(file_path)
-# df = df.drop(columns=['area_units'])
+def expand_features(df):
+    # Create a list to store new columns as DataFrames
+    new_columns = []
+    
+    # Iterate over exponents and columns to create new features
+    for exp in range(2, 44):
+        for col in df.columns:
+            if col != 'price':
+                # Create a new Series for the column raised to the power exp
+                new_col_name = f'{col}^{exp}'
+                new_col = df[col] ** exp
+                # Add the new Series as a DataFrame column to the list
+                new_columns.append(pd.DataFrame({new_col_name: new_col}, index=df.index))
+    
+    # Concatenate the original DataFrame with all new columns at once
+    expanded_df = pd.concat([df] + new_columns, axis=1)
+    
+    return expanded_df
 
-# df = expand_features(df)
-# df = df.drop(columns=['rooms^43'])
-# # print(df)
+if __name__ == '__main__':
 
-# df.to_csv('MachineLearning/tp1/data/processed/exponential_featured_train_casas_dev.csv', index=False)
+    # before split
+
+    file_path = 'MachineLearning/tp1/data/raw/casas_dev.csv'
+    df = pd.read_csv(file_path)
+    df = handle_nan_values(df)
+    convert_area_sqft_to_m2(df)
+    df.to_csv('MachineLearning/tp1/data/processed/cleaned_casas_dev.csv', index=False)
+
+    # after split
 
 
-# file_path = 'MachineLearning/tp1/data/processed/cleaned_Amanda.csv'
-# df = pd.read_csv(file_path)
+    # Train clean
 
-# df = expand_features(df)
-# df = df.drop(columns=['rooms^43'])
-# # print(df)
+    file_path = 'MachineLearning/tp1/data/processed/train_casas_dev.csv'
+    df_train = pd.read_csv(file_path)
+    df_train = df_train.drop(columns=['area_units'])
+    # normalize('area',df_train)
+    # normalize('price',df_train)
+    # normalize('age',df_train)
+    # normalize('lat',df_train)
+    # normalize('lon',df_train)
+    # normalize('rooms',df_train)
 
-# df.to_csv('MachineLearning/tp1/data/processed/exponential_featured_Amanda.csv', index=False)
+    df_train.to_csv('MachineLearning/tp1/data/processed/train_cleaned_casas_dev.csv', index=False)
 
-# Validation clean
+    # Own featured train
 
-file_path = 'MachineLearning/tp1/data/processed/val_casas_dev.csv'
-val_df = pd.read_csv(file_path)
-# convert_area_sqft_to_m2(val_df)
-val_df = val_df.drop(columns=['area_units'])
+    # df_cleaned_own_featured = handle_nan_values(df)
+    # convert_area_sqft_to_m2(df_cleaned_own_featured)
+    # df_cleaned_own_featured = df_train.drop(columns=['area_units'])
+    create_feature_area_per_room(df_train)
+    create_feature_house_and_pool(df_train)
+    create_feature_age_range(df_train)
+    # normalize('area',df_cleaned_own_featured)
+    # normalize('price',df_cleaned_own_featured)
+    # normalize('age',df_cleaned_own_featured)
+    # normalize('lat',df_cleaned_own_featured)
+    # normalize('lon',df_cleaned_own_featured)
+    # normalize('rooms',df_cleaned_own_featured)
+    # normalize('area_per_room',df_cleaned_own_featured)
 
-val_df.to_csv('MachineLearning/tp1/data/processed/val_cleaned_casas_dev.csv', index=False)
+    df_train.to_csv('MachineLearning/tp1/data/processed/own_featured_train_casas_dev.csv', index=False)
 
-# Own features validation
+    # Amanda clean
 
-create_feature_area_per_room(val_df)
-create_feature_house_and_pool(val_df)
-create_feature_age_range(val_df)
+    file_path = 'MachineLearning/tp1/data/raw/vivienda_Amanda.csv'
+    amanda_df = pd.read_csv(file_path)
+    convert_area_sqft_to_m2(amanda_df)
+    amanda_df = amanda_df.drop(columns=['area_units'])
+    amanda_df.to_csv('MachineLearning/tp1/data/processed/cleaned_Amanda.csv', index=False)
 
-val_df.to_csv('MachineLearning/tp1/data/processed/own_featured_val_casas_dev.csv', index=False)
+    # Amanda own featured
 
-# Normalized featured train 
+    # amanda_cleaned_df = handle_nan_values(amanda_df)
+    # convert_area_sqft_to_m2(amanda_cleaned_df)
+    # amanda_cleaned_df = amanda_cleaned_df.drop(columns=['area_units'])
+    create_feature_area_per_room(amanda_df)
+    create_feature_house_and_pool(amanda_df)
+    create_feature_age_range(amanda_df)
 
-file_path = 'MachineLearning/tp1/data/processed/own_featured_train_casas_dev.csv'
-df_train = pd.read_csv(file_path)
+    amanda_df.to_csv('MachineLearning/tp1/data/processed/own_featured_Amanda.csv', index=False)
 
-normalize('area',df_train)
-normalize('price',df_train)
-normalize('age',df_train)
-normalize('lat',df_train)
-normalize('lon',df_train)
-normalize('rooms',df_train)
-normalize('area_per_room',df_train)
+    # Exponential features
 
-df_train.to_csv('MachineLearning/tp1/data/processed/normalized_own_featured_train_casas_dev.csv', index=False)
 
-# Normalized featured validation
+    file_path = 'MachineLearning/tp1/data/processed/train_cleaned_casas_dev.csv'
+    df = pd.read_csv(file_path)
+    # df = df.drop(columns=['area_units'])
 
-file_path = 'MachineLearning/tp1/data/processed/own_featured_val_casas_dev.csv'
-df_val = pd.read_csv(file_path)
+    df = expand_features(df)
+    df = df.drop(columns=['rooms^43'])
+    # print(df)
 
-normalize('area',df_val)
-normalize('price',df_val)
-normalize('age',df_val)
-normalize('lat',df_val)
-normalize('lon',df_val)
-normalize('rooms',df_val)
-normalize('area_per_room',df_val)
+    df.to_csv('MachineLearning/tp1/data/processed/exponential_featured_train_casas_dev.csv', index=False)
 
-df_val.to_csv('MachineLearning/tp1/data/processed/normalized_own_featured_val_casas_dev.csv', index=False)
+
+    file_path = 'MachineLearning/tp1/data/processed/cleaned_Amanda.csv'
+    df = pd.read_csv(file_path)
+
+    df = expand_features(df)
+    df = df.drop(columns=['rooms^43'])
+    # print(df)
+
+    df.to_csv('MachineLearning/tp1/data/processed/exponential_featured_Amanda.csv', index=False)
+
+    # Validation clean
+
+    file_path = 'MachineLearning/tp1/data/processed/val_casas_dev.csv'
+    val_df = pd.read_csv(file_path)
+    # convert_area_sqft_to_m2(val_df)
+    val_df = val_df.drop(columns=['area_units'])
+
+    val_df.to_csv('MachineLearning/tp1/data/processed/val_cleaned_casas_dev.csv', index=False)
+
+    # Own features validation
+
+    create_feature_area_per_room(val_df)
+    create_feature_house_and_pool(val_df)
+    create_feature_age_range(val_df)
+
+    val_df.to_csv('MachineLearning/tp1/data/processed/own_featured_val_casas_dev.csv', index=False)
+
+    # Normalized featured train 
+
+    file_path = 'MachineLearning/tp1/data/processed/own_featured_train_casas_dev.csv'
+    df_train = pd.read_csv(file_path)
+
+    normalize('area',df_train)
+    normalize('price',df_train)
+    normalize('age',df_train)
+    normalize('lat',df_train)
+    normalize('lon',df_train)
+    normalize('rooms',df_train)
+    normalize('area_per_room',df_train)
+
+    df_train.to_csv('MachineLearning/tp1/data/processed/normalized_own_featured_train_casas_dev.csv', index=False)
+
+    # Normalized featured validation
+
+    file_path = 'MachineLearning/tp1/data/processed/own_featured_val_casas_dev.csv'
+    df_val = pd.read_csv(file_path)
+
+    normalize('area',df_val)
+    normalize('price',df_val)
+    normalize('age',df_val)
+    normalize('lat',df_val)
+    normalize('lon',df_val)
+    normalize('rooms',df_val)
+    normalize('area_per_room',df_val)
+
+    df_val.to_csv('MachineLearning/tp1/data/processed/normalized_own_featured_val_casas_dev.csv', index=False)
 
