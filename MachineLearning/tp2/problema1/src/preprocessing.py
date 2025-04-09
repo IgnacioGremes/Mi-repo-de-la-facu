@@ -1,6 +1,9 @@
 import pandas as pd
 import plotly.express as px
 import math
+import numpy as np
+from collections import Counter
+import copy
 
 def normalize(column: str, dataframe):
     assert isinstance(dataframe, pd.DataFrame)
@@ -107,5 +110,214 @@ def boxplot_outlier_removal(X, exclude=['']):
     print('{} ({:.2f}%) outliers removed'.format(diff, percent))
     return X
 
-
+def replace_nan_with_knn_custom(df, k=5):
+    """
+    Replaces NaN values in a pandas DataFrame using a custom KNN imputation method.
     
+    Parameters:
+    df (pandas.DataFrame): Input DataFrame with possible NaN values
+    k (int, optional): Number of neighbors to use for imputation (default is 5)
+    
+    Returns:
+    pandas.DataFrame: DataFrame with NaN values replaced by KNN predictions
+    """
+    # Create a copy of the DataFrame to avoid modifying the original
+    df_filled = df.copy()
+    
+    # Separate numeric and categorical columns
+    numeric_cols = df_filled.select_dtypes(include=[np.number]).columns.tolist()
+    categorical_cols = df_filled.select_dtypes(exclude=[np.number]).columns.tolist()
+    
+    # Function to compute Euclidean distance between two rows, ignoring NaN
+    def nan_euclidean_distance(row1, row2, cols):
+        diff = 0
+        count = 0
+        for col in cols:
+            if not pd.isna(row1[col]) and not pd.isna(row2[col]):
+                diff += (row1[col] - row2[col]) ** 2
+                count += 1
+        return np.sqrt(diff) if count > 0 else np.inf
+    
+    # Function to find k nearest neighbors for a row
+    def find_k_nearest_neighbors(row_idx, df, cols, k):
+        distances = []
+        target_row = df.iloc[row_idx]
+        for idx, row in df.iterrows():
+            if idx != row_idx:  # Skip the row itself
+                dist = nan_euclidean_distance(target_row, row, cols)
+                distances.append((dist, idx))
+        distances.sort()  # Sort by distance
+        return [idx for _, idx in distances[:k]]
+    
+    # Encode categorical columns to numeric for distance computation
+    df_encoded = df_filled.copy()
+    label_encoders = {}
+    for col in categorical_cols:
+        # Map unique values to integers, NaN remains NaN
+        unique_vals = df_encoded[col].dropna().unique()
+        mapping = {val: i for i, val in enumerate(unique_vals)}
+        df_encoded[col] = df_encoded[col].map(lambda x: mapping[x] if pd.notna(x) else np.nan)
+        label_encoders[col] = mapping
+    
+    # Impute NaN values
+    for col in df_encoded.columns:
+        # Rows with NaN in this column
+        nan_rows = df_encoded[col].isna()
+        if nan_rows.any():
+            for idx in df_encoded[nan_rows].index:
+                # Find k nearest neighbors based on all columns except the one being imputed
+                other_cols = [c for c in df_encoded.columns if c != col]
+                neighbors_idx = find_k_nearest_neighbors(idx, df_encoded, other_cols, k)
+                
+                # Get neighbor values for the column
+                neighbor_values = df_encoded.loc[neighbors_idx, col].dropna()
+                
+                if col in numeric_cols and len(neighbor_values) > 0:
+                    # For numeric columns, use mean of neighbors
+                    df_filled.loc[idx, col] = neighbor_values.mean()
+                elif col in categorical_cols and len(neighbor_values) > 0:
+                    # For categorical columns, use mode (most frequent value)
+                    mode_val = neighbor_values.mode()
+                    df_filled.loc[idx, col] = mode_val[0] if not mode_val.empty else np.nan
+    
+    # Decode categorical columns back to original values
+    for col in categorical_cols:
+        inverse_mapping = {v: k for k, v in label_encoders[col].items()}
+        df_filled[col] = df_filled[col].map(lambda x: inverse_mapping[int(x)] if pd.notna(x) and int(x) in inverse_mapping else x)
+    
+    return df_filled
+
+def encode_categorical(data, column_names):
+    encoders = {}
+    for col in column_names:
+        unique = list({row[col] for row in data if row[col] is not None})
+        encoders[col] = {val: i for i, val in enumerate(unique)}
+    return encoders
+
+def compute_distance(a, b, feature_types):
+    dist = 0
+    for key in a:
+        if a[key] is None or b[key] is None:
+            continue
+        if feature_types[key] == 'categorical':
+            dist += 0 if a[key] == b[key] else 1
+        else:
+            dist += (a[key] - b[key]) ** 2
+    return math.sqrt(dist)
+
+def knn_impute_all(df, k=3):
+    df = df.copy()
+    
+    # Detect categorical columns
+    cat_cols = df.select_dtypes(include=['object', 'category']).columns.tolist()
+
+    # Label encode categorical columns
+    encoders = {}
+    decoders = {}
+    for col in cat_cols:
+        unique = df[col].dropna().unique()
+        encoder = {val: i for i, val in enumerate(unique)}
+        decoder = {i: val for val, i in encoder.items()}
+        encoders[col] = encoder
+        decoders[col] = decoder
+        df[col] = df[col].map(encoder)
+
+    # Identify columns with missing values
+    columns_with_nans = df.columns[df.isna().any()].tolist()
+
+    # Impute each column
+    for target_column in columns_with_nans:
+        missing_mask = df[target_column].isna()
+        df_missing = df[missing_mask]
+        df_known = df[~missing_mask]
+
+        feature_cols = [col for col in df.columns if col != target_column]
+
+        # Feature types
+        feature_types = {
+            col: 'categorical' if col in cat_cols else 'numerical'
+            for col in feature_cols
+        }
+
+        for idx, row in df_missing.iterrows():
+            distances = []
+            for _, ref_row in df_known.iterrows():
+                dist = 0
+                for col in feature_cols:
+                    val1 = row[col]
+                    val2 = ref_row[col]
+                    if pd.isna(val1) or pd.isna(val2):
+                        continue
+                    if feature_types[col] == 'numerical':
+                        dist += (val1 - val2) ** 2
+                    else:
+                        dist += 0 if val1 == val2 else 1
+                distances.append((np.sqrt(dist), ref_row[target_column]))
+
+            if not distances:
+                continue
+
+            distances.sort(key=lambda x: x[0])
+            k_neighs = [val for _, val in distances[:k]]
+
+            if target_column in cat_cols:
+                imputed_value = Counter(k_neighs).most_common(1)[0][0]
+            else:
+                imputed_value = np.mean(k_neighs)
+
+            df.at[idx, target_column] = imputed_value
+
+    # Decode categorical columns back to original labels
+    for col in cat_cols:
+        decoder = decoders[col]
+        df[col] = df[col].round().astype(int).map(decoder)
+
+    return df
+
+def replace_question_marks_with_nan(df, column):
+    df = df.copy()
+    df[column] = df[column].replace('???', np.nan)
+    return df
+
+
+def one_hot_encode_column(df, column_name, prefix=None, drop_original=True, handle_nan=True):
+    """
+    Performs one-hot encoding on a specified column in a DataFrame using pandas.
+    
+    Parameters:
+    df (pandas.DataFrame): Input DataFrame
+    column_name (str): Name of the column to one-hot encode
+    prefix (str, optional): Prefix for the new column names (default: column_name)
+    drop_original (bool, optional): Whether to drop the original column (default: True)
+    handle_nan (bool, optional): Whether to include a column for NaN values (default: True)
+    
+    Returns:
+    pandas.DataFrame: DataFrame with the specified column one-hot encoded
+    """
+    # Validate input
+    if not isinstance(df, pd.DataFrame):
+        raise ValueError("Input must be a pandas DataFrame")
+    if column_name not in df.columns:
+        raise ValueError(f"Column '{column_name}' not found in DataFrame")
+    
+    # Create a copy of the DataFrame to avoid modifying the original
+    df_encoded = df.copy()
+    
+    # Set prefix for new columns
+    prefix = column_name if prefix is None else prefix
+    
+    # Perform one-hot encoding with pandas.get_dummies
+    # dummy_na=True includes a column for NaN if handle_nan is True
+    encoded_cols = pd.get_dummies(df_encoded[column_name], 
+                                 prefix=prefix, 
+                                 dummy_na=handle_nan, 
+                                 dtype=int)
+    
+    # Concatenate the encoded columns with the original DataFrame
+    df_encoded = pd.concat([df_encoded, encoded_cols], axis=1)
+    
+    # Drop the original column if requested
+    if drop_original:
+        df_encoded = df_encoded.drop(columns=[column_name])
+    
+    return df_encoded
