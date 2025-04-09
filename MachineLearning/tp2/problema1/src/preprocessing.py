@@ -3,7 +3,6 @@ import plotly.express as px
 import math
 import numpy as np
 from collections import Counter
-import copy
 
 def normalize(column: str, dataframe):
     assert isinstance(dataframe, pd.DataFrame)
@@ -310,7 +309,7 @@ def one_hot_encode_column(df, column_name, prefix=None, drop_original=True, hand
     # dummy_na=True includes a column for NaN if handle_nan is True
     encoded_cols = pd.get_dummies(df_encoded[column_name], 
                                  prefix=prefix, 
-                                 dummy_na=handle_nan, 
+                                #  dummy_na=handle_nan, 
                                  dtype=int)
     
     # Concatenate the encoded columns with the original DataFrame
@@ -321,3 +320,51 @@ def one_hot_encode_column(df, column_name, prefix=None, drop_original=True, hand
         df_encoded = df_encoded.drop(columns=[column_name])
     
     return df_encoded
+
+def convert_to_binary(data, column_name):
+    """
+    Convert a categorical column with 'Presnt' and 'Absnt' to a binary column (1 and 0).
+    
+    Parameters:
+    - data (pd.DataFrame): Input dataset containing the column to convert.
+    - column_name (str): Name of the column to convert.
+    
+    Returns:
+    - pd.DataFrame: Dataset with the specified column converted to binary.
+    """
+    
+    # Make a copy of the dataset to avoid modifying the original
+    df = data.copy()
+    
+    # Check if the column exists
+    if column_name not in df.columns:
+        raise ValueError(f"Column '{column_name}' not found in the dataset.")
+    
+    # Mapping dictionary for conversion
+    mapping = {'Presnt': 1, 'Absnt': 0}
+    
+    # Convert the column using the mapping
+    df[column_name] = df[column_name].map(mapping)
+    
+    # Check for any values that weren't mapped (e.g., typos or unexpected values)
+    if df[column_name].isna().any():
+        raise ValueError(f"Column '{column_name}' contains values other than 'Presnt' or 'Absnt'.")
+    
+    return df
+
+def normalize_columns(data, exclude_cols=None):
+    assert isinstance(data, pd.DataFrame)
+    df = data.copy()
+    numerical_cols = df.select_dtypes(include=[np.number]).columns
+    # numerical_cols = df.columns
+    if exclude_cols:
+        numerical_cols = [col for col in numerical_cols if col not in exclude_cols]
+    stats = {}
+    for col in numerical_cols:
+        mu = df[col].mean()
+        sigma = df[col].std()
+        if sigma == 0:
+            raise ValueError(f"Column '{col}' has zero standard deviation.")
+        df[col] = (df[col] - mu) / sigma
+        stats[col] = {'mu': mu, 'sigma': sigma}
+    return df, stats
