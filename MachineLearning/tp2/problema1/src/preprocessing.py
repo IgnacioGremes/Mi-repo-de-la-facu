@@ -3,6 +3,7 @@ import plotly.express as px
 import math
 import numpy as np
 from collections import Counter
+import random
 
 def normalize(column: str, dataframe):
     assert isinstance(dataframe, pd.DataFrame)
@@ -368,3 +369,135 @@ def normalize_columns(data, exclude_cols=None):
         df[col] = (df[col] - mu) / sigma
         stats[col] = {'mu': mu, 'sigma': sigma}
     return df, stats
+
+import pandas as pd
+import numpy as np
+from collections import Counter
+
+def knn_impute_all_optimized(df, k=3):
+    df = df.copy()
+    
+    # Identify categorical columns
+    cat_cols = df.select_dtypes(include=['object', 'category']).columns.tolist()
+
+    # Encode categorical columns
+    encoders, decoders = {}, {}
+    for col in cat_cols:
+        unique = df[col].dropna().unique()
+        encoder = {val: i for i, val in enumerate(unique)}
+        decoder = {i: val for val, i in encoder.items()}
+        df[col] = df[col].map(encoder)
+        encoders[col], decoders[col] = encoder, decoder
+
+    # Convert DataFrame to NumPy array for fast computation
+    data_np = df.to_numpy()
+    n_rows, n_cols = data_np.shape
+    col_names = df.columns.tolist()
+
+    # Get column indices
+    col_index_map = {col: i for i, col in enumerate(col_names)}
+    cat_col_indices = [col_index_map[c] for c in cat_cols]
+    nan_cols = np.any(pd.isna(df), axis=0)
+
+    for target_idx, is_nan_col in enumerate(nan_cols):
+        if not is_nan_col:
+            continue
+        
+        target_col = col_names[target_idx]
+        is_cat = target_idx in cat_col_indices
+
+        missing_rows = np.isnan(data_np[:, target_idx])
+        known_rows = ~missing_rows
+
+        X_known = data_np[known_rows][:, [i for i in range(n_cols) if i != target_idx]]
+        y_known = data_np[known_rows, target_idx]
+        X_missing = data_np[missing_rows][:, [i for i in range(n_cols) if i != target_idx]]
+        missing_indices = np.where(missing_rows)[0]
+
+        # Feature types (categorical/numerical)
+        feat_types = [
+            'categorical' if i in cat_col_indices else 'numerical'
+            for i in range(n_cols) if i != target_idx
+        ]
+
+        # Impute each missing row
+        for i, row in enumerate(X_missing):
+            mask = ~np.isnan(row)
+            if not np.any(mask):
+                continue
+
+            # Compute distances to known rows
+            diffs = X_known[:, mask] - row[mask]
+            dists = np.zeros(len(X_known))
+            for j, col_type in enumerate(np.array(feat_types)[mask]):
+                if col_type == 'numerical':
+                    dists += diffs[:, j] ** 2
+                else:  # categorical
+                    dists += diffs[:, j] != 0
+            dists = np.sqrt(dists)
+
+            # Get k nearest neighbors
+            k_idx = np.argpartition(dists, k)[:k]
+            neighbors = y_known[k_idx]
+
+            # Impute
+            if is_cat:
+                imputed = Counter(neighbors[~np.isnan(neighbors)]).most_common(1)
+                if imputed:
+                    data_np[missing_indices[i], target_idx] = imputed[0][0]
+            else:
+                valid_vals = neighbors[~np.isnan(neighbors)]
+                if len(valid_vals) > 0:
+                    data_np[missing_indices[i], target_idx] = np.mean(valid_vals)
+
+    # Convert back to DataFrame
+    df_imputed = pd.DataFrame(data_np, columns=col_names)
+
+    # Decode categorical columns
+    for col in cat_cols:
+        col_idx = col_index_map[col]
+        decoder = decoders[col]
+        df_imputed[col] = df_imputed[col].round().astype(int).map(decoder)
+
+    return df_imputed
+
+def undersample_data(df, target_column, random_seed=42):
+    """
+    Perform random undersampling on a dataset to balance classes without sklearn.
+    
+    Parameters:
+    df (pandas.DataFrame): Input dataframe containing features and target
+    target_column (str): Name of the target column with class labels
+    random_seed (int): Seed for reproducibility (default: 42)
+    
+    Returns:
+    pandas.DataFrame: Undersampled dataframe
+    """
+    # Set random seed for reproducibility
+    random.seed(random_seed)
+    
+    # Separate majority and minority classes
+    class_counts = df[target_column].value_counts()
+    minority_class = class_counts.idxmin()
+    majority_class = class_counts.idxmax()
+    
+    df_minority = df[df[target_column] == minority_class]
+    df_majority = df[df[target_column] == majority_class]
+    
+    # Get the size of the minority class
+    minority_size = len(df_minority)
+    
+    # Randomly select indices from the majority class
+    majority_indices = df_majority.index.tolist()
+    undersampled_indices = random.sample(majority_indices, minority_size)
+    
+    # Create undersampled majority dataframe
+    df_majority_undersampled = df_majority.loc[undersampled_indices]
+    
+    # Combine minority class with undersampled majority class
+    df_undersampled = pd.concat([df_majority_undersampled, df_minority])
+    
+    # Shuffle the resulting dataframe
+    df_undersampled = df_undersampled.sample(frac=1, random_state=random_seed).reset_index(drop=True)
+    
+    return df_undersampled
