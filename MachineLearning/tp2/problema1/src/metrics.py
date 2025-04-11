@@ -195,3 +195,86 @@ def calculate_auc_pr(y_true, y_prob):
     precision_vals, recall_vals = calculate_precision_recall_curve(y_true, y_prob)
     auc_pr = np.sum(np.diff(recall_vals) * (np.array(precision_vals[:-1]) + np.array(precision_vals[1:])) / 2)
     return abs(auc_pr)  # Ensure positive value
+
+def print_results_table_from_lists(all_metrics):
+    """
+    Print a formatted table of model performance metrics from a list of lists.
+    
+    Parameters:
+    all_metrics (list of lists): List where each inner list contains the metrics for all models.
+                                 Expected structure: [accuracies, precisions, recalls, f_scores, auc_rocs, auc_prs]
+                                 Each inner list should have 5 values in order: 
+                                 [Sin rebalanceo, Undersampling, Oversampling duplicate, Oversampling SMOTE, Cost re-weighting]
+    """
+    # Define the expected models and metrics
+    expected_models = ['Sin rebalanceo', 'Undersampling', 'Oversampling duplicate', 
+                       'Oversampling SMOTE', 'Cost re-weighting']
+    expected_metrics = ['Accuracy', 'Precision', 'Recall', 'F-Score', 'AUC-ROC', 'AUC-PR']
+    
+    # Validate the input
+    if len(all_metrics) != len(expected_metrics):
+        raise ValueError(f"Expected {len(expected_metrics)} metric lists, got {len(all_metrics)}")
+    for metric_list in all_metrics:
+        if len(metric_list) != len(expected_models):
+            raise ValueError(f"Each metric list must contain {len(expected_models)} values, got {len(metric_list)}")
+    
+    # Organize the data into a dictionary for easier access
+    results_dict = {}
+    for model_idx, model in enumerate(expected_models):
+        results_dict[model] = {}
+        for metric_idx, metric in enumerate(expected_metrics):
+            results_dict[model][metric] = all_metrics[metric_idx][model_idx]
+    
+    # Define column widths
+    col_widths = {
+        'Modelo': max(len('Modelo'), max(len(model) for model in expected_models)),
+        'Accuracy': max(len('Accuracy'), max(len(f"{results_dict[model]['Accuracy']:.3f}") for model in expected_models)),
+        'Precision': max(len('Precision'), max(len(f"{results_dict[model]['Precision']:.3f}") for model in expected_models)),
+        'Recall': max(len('Recall'), max(len(f"{results_dict[model]['Recall']:.3f}") for model in expected_models)),
+        'F-Score': max(len('F-Score'), max(len(f"{results_dict[model]['F-Score']:.3f}") for model in expected_models)),
+        'AUC-ROC': max(len('AUC-ROC'), max(len(f"{results_dict[model]['AUC-ROC']:.3f}") for model in expected_models)),
+        'AUC-PR': max(len('AUC-PR'), max(len(f"{results_dict[model]['AUC-PR']:.3f}") for model in expected_models))
+    }
+    
+    # Create the header
+    header = (f"| {{:<{col_widths['Modelo']}}} "
+              f"| {{:<{col_widths['Accuracy']}}} "
+              f"| {{:<{col_widths['Precision']}}} "
+              f"| {{:<{col_widths['Recall']}}} "
+              f"| {{:<{col_widths['F-Score']}}} "
+              f"| {{:<{col_widths['AUC-ROC']}}} "
+              f"| {{:<{col_widths['AUC-PR']}}} |")
+    
+    # Print header
+    print(header.format('Modelo', 'Accuracy', 'Precision', 'Recall', 'F-Score', 'AUC-ROC', 'AUC-PR'))
+    
+    # Print separator
+    separator = (f"|{'-' * (col_widths['Modelo'] + 2)}"
+                 f"|{'-' * (col_widths['Accuracy'] + 2)}"
+                 f"|{'-' * (col_widths['Precision'] + 2)}"
+                 f"|{'-' * (col_widths['Recall'] + 2)}"
+                 f"|{'-' * (col_widths['F-Score'] + 2)}"
+                 f"|{'-' * (col_widths['AUC-ROC'] + 2)}"
+                 f"|{'-' * (col_widths['AUC-PR'] + 2)}|")
+    print(separator)
+    
+    # Print rows
+    row_template = (f"| {{:<{col_widths['Modelo']}}} "
+                    f"| {{:<{col_widths['Accuracy']}}} "
+                    f"| {{:<{col_widths['Precision']}}} "
+                    f"| {{:<{col_widths['Recall']}}} "
+                    f"| {{:<{col_widths['F-Score']}}} "
+                    f"| {{:<{col_widths['AUC-ROC']}}} "
+                    f"| {{:<{col_widths['AUC-PR']}}} |")
+    
+    for model in expected_models:
+        metrics = results_dict[model]
+        print(row_template.format(
+            model,
+            f"{metrics['Accuracy']:.3f}",
+            f"{metrics['Precision']:.3f}",
+            f"{metrics['Recall']:.3f}",
+            f"{metrics['F-Score']:.3f}",
+            f"{metrics['AUC-ROC']:.3f}",
+            f"{metrics['AUC-PR']:.3f}"
+        ))

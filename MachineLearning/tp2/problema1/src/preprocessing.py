@@ -353,22 +353,47 @@ def convert_to_binary(data, column_name):
     
     return df
 
-def normalize_columns(data, exclude_cols=None):
+def normalize_columns(data, exclude_cols=None, stats=None):
+    """
+    Normalize numerical columns in a DataFrame using either provided stats or computed ones.
+    
+    Parameters:
+    data (pandas.DataFrame): Input DataFrame to normalize
+    exclude_cols (list, optional): Columns to exclude from normalization
+    stats (dict, optional): Dictionary with column names as keys and {'mu': mean, 'sigma': std} as values
+    
+    Returns:
+    tuple: (normalized DataFrame, stats dictionary with mean and std for each column)
+           If stats is provided, the returned stats will be empty unless computed internally.
+    """
     assert isinstance(data, pd.DataFrame)
     df = data.copy()
     numerical_cols = df.select_dtypes(include=[np.number]).columns
-    # numerical_cols = df.columns
+    
     if exclude_cols:
         numerical_cols = [col for col in numerical_cols if col not in exclude_cols]
-    stats = {}
+    
+    computed_stats = {}
+    
+    # If stats is provided, use it; otherwise, compute the stats
     for col in numerical_cols:
-        mu = df[col].mean()
-        sigma = df[col].std()
-        if sigma == 0:
-            raise ValueError(f"Column '{col}' has zero standard deviation.")
+        if stats is not None and col in stats:
+            mu = stats[col]['mu']
+            sigma = stats[col]['sigma']
+            if sigma == 0:
+                raise ValueError(f"Provided standard deviation for column '{col}' is zero.")
+        else:
+            # Compute mean and std if not provided
+            mu = df[col].mean()
+            sigma = df[col].std()
+            if sigma == 0:
+                raise ValueError(f"Column '{col}' has zero standard deviation.")
+            computed_stats[col] = {'mu': mu, 'sigma': sigma}
+        
+        # Normalize the column
         df[col] = (df[col] - mu) / sigma
-        stats[col] = {'mu': mu, 'sigma': sigma}
-    return df, stats
+    
+    return df, computed_stats
 
 import pandas as pd
 import numpy as np
@@ -501,3 +526,149 @@ def undersample_data(df, target_column, random_seed=42):
     df_undersampled = df_undersampled.sample(frac=1, random_state=random_seed).reset_index(drop=True)
     
     return df_undersampled
+
+def oversample_data_dup(df, target_column, random_seed=42):
+    """
+    Perform oversampling by duplicating random rows from the minority class to balance the dataset.
+    
+    Parameters:
+    df (pandas.DataFrame): Input DataFrame containing features and target
+    target_column (str): Name of the target column with class labels
+    random_seed (int): Seed for reproducibility (default: 42)
+    
+    Returns:
+    pandas.DataFrame: Oversampled DataFrame with balanced classes
+    """
+    # Input validation
+    assert isinstance(df, pd.DataFrame), "Input must be a pandas DataFrame"
+    assert target_column in df.columns, f"Target column '{target_column}' not found in DataFrame"
+    
+    # Set random seed for reproducibility
+    random.seed(random_seed)
+    
+    # Identify majority and minority classes
+    class_counts = df[target_column].value_counts()
+    if len(class_counts) < 2:
+        raise ValueError("At least two classes are required for oversampling")
+    
+    majority_class = class_counts.idxmax()
+    minority_class = class_counts.idxmin()
+    majority_size = class_counts[majority_class]
+    minority_size = class_counts[minority_class]
+    
+    if majority_size == minority_size:
+        return df.copy()  # No oversampling needed if classes are already balanced
+    
+    # Separate majority and minority classes
+    df_minority = df[df[target_column] == minority_class]
+    df_majority = df[df[target_column] == majority_class]
+    
+    # Calculate how many additional minority samples are needed
+    samples_needed = majority_size - minority_size
+    
+    # Randomly duplicate rows from the minority class
+    oversampled_indices = random.choices(df_minority.index.tolist(), k=samples_needed)
+    df_minority_oversampled = df_minority.loc[oversampled_indices]
+    
+    # Combine majority and oversampled minority classes
+    df_oversampled = pd.concat([df_majority, df_minority, df_minority_oversampled])
+    
+    # Shuffle the resulting DataFrame
+    df_oversampled = df_oversampled.sample(frac=1, random_state=random_seed).reset_index(drop=True)
+    
+    return df_oversampled
+
+def oversample_smote(df, target_column, random_seed=42, k_neighbors=5):
+    """
+    Perform oversampling using SMOTE (Synthetic Minority Oversampling Technique) 
+    without imblearn or sklearn.
+    
+    Parameters:
+    df (pandas.DataFrame): Input DataFrame containing features and target
+    target_column (str): Name of the target column with class labels
+    random_seed (int): Seed for reproducibility (default: 42)
+    k_neighbors (int): Number of nearest neighbors to use for SMOTE (default: 5)
+    
+    Returns:
+    pandas.DataFrame: Oversampled DataFrame with balanced classes
+    """
+    # Input validation
+    assert isinstance(df, pd.DataFrame), "Input must be a pandas DataFrame"
+    assert target_column in df.columns, f"Target column '{target_column}' not found in DataFrame"
+    
+    # Set random seed for reproducibility
+    np.random.seed(random_seed)
+    random.seed(random_seed)
+    
+    # Separate features and target
+    X = df.drop(columns=[target_column]).values
+    y = df[target_column].values
+    
+    # Ensure X contains only numerical data
+    if not all(df.drop(columns=[target_column]).dtypes.apply(lambda x: np.issubdtype(x, np.number))):
+        raise ValueError("All feature columns must be numerical for SMOTE")
+    
+    # Identify majority and minority classes
+    class_counts = pd.Series(y).value_counts()
+    if len(class_counts) < 2:
+        raise ValueError("At least two classes are required for oversampling")
+    
+    majority_class = class_counts.idxmax()
+    minority_class = class_counts.idxmin()
+    majority_size = class_counts[majority_class]
+    minority_size = class_counts[minority_class]
+    
+    if majority_size == minority_size:
+        return df.copy()  # No oversampling needed if classes are balanced
+    
+    # Extract minority class samples
+    minority_indices = np.where(y == minority_class)[0]
+    X_minority = X[minority_indices]
+    
+    # Adjust k_neighbors if minority class is too small
+    if minority_size <= k_neighbors:
+        k_neighbors = max(1, minority_size - 1)
+        print(f"Warning: Adjusted k_neighbors to {k_neighbors} due to small minority class size")
+    
+    # Function to compute k-nearest neighbors (Euclidean distance)
+    def get_k_nearest_neighbors(X, point, k):
+        distances = np.sqrt(np.sum((X - point) ** 2, axis=1))
+        # Exclude the point itself by setting its distance to infinity
+        distances[np.where((X == point).all(axis=1))[0]] = np.inf
+        # Get indices of k nearest neighbors
+        nearest_indices = np.argsort(distances)[:k]
+        return nearest_indices
+    
+    # Generate synthetic samples
+    samples_needed = majority_size - minority_size
+    synthetic_samples = []
+    
+    for _ in range(samples_needed):
+        # Randomly select a minority sample
+        idx = random.choice(range(minority_size))
+        sample = X_minority[idx]
+        
+        # Find k-nearest neighbors within minority class
+        neighbor_indices = get_k_nearest_neighbors(X_minority, sample, k_neighbors)
+        neighbor = X_minority[random.choice(neighbor_indices)]
+        
+        # Generate synthetic sample
+        alpha = np.random.uniform(0, 1)
+        synthetic_sample = sample + alpha * (neighbor - sample)
+        synthetic_samples.append(synthetic_sample)
+    
+    # Combine original and synthetic samples
+    X_synthetic = np.array(synthetic_samples)
+    y_synthetic = np.array([minority_class] * samples_needed)
+    
+    # Reconstruct DataFrame
+    X_combined = np.vstack([X, X_synthetic])
+    y_combined = np.hstack([y, y_synthetic])
+    
+    df_resampled = pd.DataFrame(X_combined, columns=df.drop(columns=[target_column]).columns)
+    df_resampled[target_column] = y_combined
+    
+    # Shuffle the resulting DataFrame
+    df_resampled = df_resampled.sample(frac=1, random_state=random_seed).reset_index(drop=True)
+    
+    return df_resampled
