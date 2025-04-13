@@ -1,11 +1,9 @@
 import numpy as np
-import pandas as pd
-import os
 
 def train_val_split(dataframe):
 
     n_samples = len(dataframe)
-    np.random.seed(40)
+    # np.random.seed(40)
     indices = np.random.permutation(n_samples)
 
     split_point = int(n_samples * 0.8)

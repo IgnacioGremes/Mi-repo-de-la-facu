@@ -75,7 +75,7 @@ def handle_nan_values(df):
 
     return df_filled
 
-def boxplot_outlier_removal(X, exclude=['']):
+def boxplot_outlier_removal(X, q1=0.25, q3=0.75, exclude=['']):
     '''
     remove outliers detected by boxplot (Q1/Q3 -/+ IQR*1.5)
 
@@ -97,8 +97,8 @@ def boxplot_outlier_removal(X, exclude=['']):
     for col in X.columns:
         if col not in exclude:
             # get Q1, Q3 & Interquantile Range
-            Q1 = X[col].quantile(0.25)
-            Q3 = X[col].quantile(0.75)
+            Q1 = X[col].quantile(q1)
+            Q3 = X[col].quantile(q3)
             IQR = Q3 - Q1
             # define outliers and remove them
             filter_ = (X[col] > Q1 - 1.5 * IQR) & (X[col] < Q3 + 1.5 *IQR)

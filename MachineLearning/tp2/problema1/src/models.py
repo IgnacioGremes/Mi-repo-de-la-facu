@@ -114,6 +114,9 @@ class LogisticRegressionL2:
         probs = self.predict_proba(X)
         return (probs >= threshold).astype(int)
     
+    def print_coefficients(self):
+        print(f"Coefficients: {self.weights}")
+    
 
 class LogisticRegressionL2_cost:
     """
@@ -243,3 +246,6 @@ class LogisticRegressionL2_cost:
         """
         probs = self.predict_proba(X)
         return (probs >= threshold).astype(int)
+    
+    def print_coefficients(self):
+        print(f"Coefficients: {self.weights}")
