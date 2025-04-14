@@ -34,150 +34,6 @@ def count_categories(df, column_name):
     
     return counts_dict
 
-# def calculate_precision_recall_curve_multi(y_true, y_prob, classes=None):
-#     """
-#     Compute precision-recall curves for a multi-class problem using one-vs-rest.
-    
-#     Parameters:
-#     y_true (np.ndarray): True labels, shape (n_samples,)
-#     y_prob (np.ndarray): Predicted probabilities, shape (n_samples, n_classes)
-#     classes (list, optional): List of class labels. If None, inferred from y_true.
-    
-#     Returns:
-#     dict: Precision values for each class, {class: precision_array}
-#     dict: Recall values for each class, {class: recall_array}
-#     dict: Thresholds for each class, {class: thresholds_array}
-#     """
-#     # Infer classes if not provided
-#     if classes is None:
-#         classes = np.unique(y_true)
-    
-#     # Ensure inputs are numpy arrays
-#     y_true = np.array(y_true)
-#     y_prob = np.array(y_prob)
-    
-#     if y_true.shape[0] != y_prob.shape[0]:
-#         raise ValueError(f"y_true and y_prob must have the same number of samples. "
-#                          f"Got {y_true.shape[0]} for y_true and {y_prob.shape[0]} for y_prob.")
-    
-#     if y_prob.shape[1] != len(classes):
-#         raise ValueError(f"y_prob must have probabilities for each class. "
-#                          f"Got {y_prob.shape[1]} columns, but expected {len(classes)} classes.")
-    
-#     precision_dict = {}
-#     recall_dict = {}
-#     thresholds_dict = {}
-    
-#     for idx, c in enumerate(classes):
-#         # One-vs-rest: Treat class c as positive, others as negative
-#         y_true_binary = (y_true == c).astype(int)
-#         # Extract probabilities for class c
-#         y_prob_c = y_prob[:, idx]
-        
-#         # Sort by probabilities in descending order
-#         sorted_indices = np.argsort(y_prob_c)[::-1]
-#         y_prob_sorted = y_prob_c[sorted_indices]
-#         y_true_sorted = y_true_binary[sorted_indices]
-        
-#         # Compute thresholds
-#         thresholds = np.concatenate([[1.1], y_prob_sorted])
-#         thresholds = np.unique(thresholds)[::-1]
-        
-#         # Compute precision and recall at each threshold
-#         precision_vals = []
-#         recall_vals = []
-#         tp = 0
-#         fp = 0
-#         fn = np.sum(y_true_binary)  # Total positives
-        
-#         for thresh in thresholds:
-#             y_pred_binary = (y_prob_c >= thresh).astype(int)
-#             tp = np.sum((y_pred_binary == 1) & (y_true_binary == 1))
-#             fp = np.sum((y_pred_binary == 1) & (y_true_binary == 0))
-#             fn = np.sum((y_pred_binary == 0) & (y_true_binary == 1))
-            
-#             precision = tp / (tp + fp) if (tp + fp) > 0 else 1.0
-#             recall = tp / (tp + fn) if (tp + fn) > 0 else 0.0
-            
-#             precision_vals.append(precision)
-#             recall_vals.append(recall)
-        
-#         precision_dict[c] = np.array(precision_vals)
-#         recall_dict[c] = np.array(recall_vals)
-#         thresholds_dict[c] = thresholds
-    
-#     return precision_dict, recall_dict, thresholds_dict
-
-# def calculate_roc_curve_multi(y_true, y_prob, classes=None):
-#     """
-#     Compute ROC curves for a multi-class problem using one-vs-rest.
-    
-#     Parameters:
-#     y_true (np.ndarray): True labels, shape (n_samples,)
-#     y_prob (np.ndarray): Predicted probabilities, shape (n_samples, n_classes)
-#     classes (list, optional): List of class labels. If None, inferred from y_true.
-    
-#     Returns:
-#     dict: FPR values for each class, {class: fpr_array}
-#     dict: TPR values for each class, {class: tpr_array}
-#     dict: Thresholds for each class, {class: thresholds_array}
-#     """
-#     if classes is None:
-#         classes = np.unique(y_true)
-    
-#     y_true = np.array(y_true)
-#     y_prob = np.array(y_prob)
-    
-#     if y_true.shape[0] != y_prob.shape[0]:
-#         raise ValueError(f"y_true and y_prob must have the same number of samples. "
-#                          f"Got {y_true.shape[0]} for y_true and {y_prob.shape[0]} for y_prob.")
-    
-#     if y_prob.shape[1] != len(classes):
-#         raise ValueError(f"y_prob must have probabilities for each class. "
-#                          f"Got {y_prob.shape[1]} columns, but expected {len(classes)} classes.")
-    
-#     fpr_dict = {}
-#     tpr_dict = {}
-#     thresholds_dict = {}
-    
-#     for idx, c in enumerate(classes):
-#         y_true_binary = (y_true == c).astype(int)
-#         y_prob_c = y_prob[:, idx]
-        
-#         sorted_indices = np.argsort(y_prob_c)[::-1]
-#         y_prob_sorted = y_prob_c[sorted_indices]
-#         y_true_sorted = y_true_binary[sorted_indices]
-        
-#         thresholds = np.concatenate([[1.1], y_prob_sorted])
-#         thresholds = np.unique(thresholds)[::-1]
-        
-#         fpr_vals = []
-#         tpr_vals = []
-#         tp = 0
-#         fp = 0
-#         fn = np.sum(y_true_binary)
-#         tn = len(y_true_binary) - fn
-        
-#         for thresh in thresholds:
-#             y_pred_binary = (y_prob_c >= thresh).astype(int)
-#             tp = np.sum((y_pred_binary == 1) & (y_true_binary == 1))
-#             fp = np.sum((y_pred_binary == 1) & (y_true_binary == 0))
-#             fn = np.sum((y_pred_binary == 0) & (y_true_binary == 1))
-#             tn = np.sum((y_pred_binary == 0) & (y_true_binary == 0))
-            
-#             tpr = tp / (tp + fn) if (tp + fn) > 0 else 0.0
-#             fpr = fp / (fp + tn) if (fp + tn) > 0 else 0.0
-            
-#             tpr_vals.append(tpr)
-#             fpr_vals.append(fpr)
-        
-#         fpr_dict[c] = np.array(fpr_vals)
-#         tpr_dict[c] = np.array(tpr_vals)
-#         thresholds_dict[c] = thresholds
-    
-#     return fpr_dict, tpr_dict, thresholds_dict
-
-
 def print_results_table_from_lists_2(all_metrics):
     """
     Print a formatted table of model performance metrics from a list of lists.
@@ -260,481 +116,35 @@ def print_results_table_from_lists_2(all_metrics):
             f"{metrics['AUC-PR']:.3f}"
         ))
 
-# def calculate_accuracy_multi(y_true, y_pred):
-#     """
-#     Compute accuracy for a multi-class classification problem.
-    
-#     Parameters:
-#     y_true (list or np.ndarray): True labels, shape (n_samples,)
-#     y_pred (list or np.ndarray): Predicted labels, shape (n_samples,)
-    
-#     Returns:
-#     float: Accuracy for the entire dataset
-#     """
-#     y_true = np.array(y_true)
-#     y_pred = np.array(y_pred)
-    
-#     if y_true.shape != y_pred.shape:
-#         raise ValueError(f"y_true and y_pred must have the same shape. "
-#                          f"Got {y_true.shape} for y_true and {y_pred.shape} for y_pred.")
-    
-#     correct = np.sum(y_true == y_pred)
-#     total = len(y_true)
-#     return correct / total if total > 0 else 0.0
-
-# def calculate_precision_multi(y_true, y_pred):
-#     """
-#     Compute micro-averaged precision for a multi-class classification problem.
-    
-#     Parameters:
-#     y_true (list or np.ndarray): True labels, shape (n_samples,)
-#     y_pred (list or np.ndarray): Predicted labels, shape (n_samples,)
-    
-#     Returns:
-#     float: Micro-averaged precision for the entire dataset
-#     """
-#     y_true = np.array(y_true)
-#     y_pred = np.array(y_pred)
-    
-#     if y_true.shape != y_pred.shape:
-#         raise ValueError(f"y_true and y_pred must have the same shape. "
-#                          f"Got {y_true.shape} for y_true and {y_pred.shape} for y_pred.")
-    
-#     classes = np.unique(y_true)
-#     if not np.all(np.isin(classes, [1, 2, 3])):
-#         raise ValueError(f"Classes must be 1, 2, or 3. Got {classes}.")
-    
-#     # Micro-average: Compute global TP and FP
-#     tp_total = 0
-#     fp_total = 0
-#     for c in classes:
-#         tp = np.sum((y_pred == c) & (y_true == c))
-#         fp = np.sum((y_pred == c) & (y_true != c))
-#         tp_total += tp
-#         fp_total += fp
-    
-#     micro_precision = tp_total / (tp_total + fp_total) if (tp_total + fp_total) > 0 else 0.0
-#     return micro_precision
-
-# def calculate_recall_multi(y_true, y_pred):
-#     """
-#     Compute micro-averaged recall for a multi-class classification problem.
-    
-#     Parameters:
-#     y_true (list or np.ndarray): True labels, shape (n_samples,)
-#     y_pred (list or np.ndarray): Predicted labels, shape (n_samples,)
-    
-#     Returns:
-#     float: Micro-averaged recall for the entire dataset
-#     """
-#     y_true = np.array(y_true)
-#     y_pred = np.array(y_pred)
-    
-#     if y_true.shape != y_pred.shape:
-#         raise ValueError(f"y_true and y_pred must have the same shape. "
-#                          f"Got {y_true.shape} for y_true and {y_pred.shape} for y_pred.")
-    
-#     classes = np.unique(y_true)
-#     if not np.all(np.isin(classes, [1, 2, 3])):
-#         raise ValueError(f"Classes must be 1, 2, or 3. Got {classes}.")
-    
-#     # Micro-average: Compute global TP and FN
-#     tp_total = 0
-#     fn_total = 0
-#     for c in classes:
-#         tp = np.sum((y_pred == c) & (y_true == c))
-#         fn = np.sum((y_pred != c) & (y_true == c))
-#         tp_total += tp
-#         fn_total += fn
-    
-#     micro_recall = tp_total / (tp_total + fn_total) if (tp_total + fn_total) > 0 else 0.0
-#     return micro_recall
-
-# def calculate_fscore_multi(y_true, y_pred, beta=1.0):
-#     """
-#     Compute micro-averaged F-score for a multi-class classification problem.
-    
-#     Parameters:
-#     y_true (list or np.ndarray): True labels, shape (n_samples,)
-#     y_pred (list or np.ndarray): Predicted labels, shape (n_samples,)
-#     beta (float): Weight of recall in F-score (default: 1.0 for F1-score)
-    
-#     Returns:
-#     float: Micro-averaged F-score for the entire dataset
-#     """
-#     precision = calculate_precision_multi(y_true, y_pred)
-#     recall = calculate_recall_multi(y_true, y_pred)
-    
-#     denom = beta**2 * precision + recall
-#     micro_fscore = (1 + beta**2) * (precision * recall) / denom if denom > 0 else 0.0
-#     return micro_fscore
-
-# def calculate_auc_roc_multi(y_true, y_prob):
-#     """
-#     Compute micro-averaged AUC-ROC for a multi-class classification problem.
-    
-#     Parameters:
-#     y_true (list or np.ndarray): True labels, shape (n_samples,)
-#     y_prob (list or np.ndarray): Predicted probabilities, shape (n_samples, n_classes) or list of lists
-    
-#     Returns:
-#     float: Micro-averaged AUC-ROC for the entire dataset
-#     """
-#     y_true = np.array(y_true)
-#     y_prob = np.array(y_prob)  # Handles list of lists input
-    
-#     if y_true.shape[0] != y_prob.shape[0]:
-#         raise ValueError(f"y_true and y_prob must have the same number of samples. "
-#                          f"Got {y_true.shape[0]} for y_true and {y_prob.shape[0]} for y_prob.")
-    
-#     classes = np.unique(y_true)
-#     if not np.all(np.isin(classes, [1, 2, 3])):
-#         raise ValueError(f"Classes must be 1, 2, or 3. Got {classes}.")
-    
-#     if y_prob.shape[1] != len(classes):
-#         raise ValueError(f"y_prob must have probabilities for each class. "
-#                          f"Got {y_prob.shape[1]} columns, but expected {len(classes)} classes.")
-    
-#     # Micro-average: Flatten into a binary classification problem
-#     # For each sample, take the probability of the true class as the positive score
-#     true_probs = []
-#     binary_labels = []
-    
-#     for i in range(len(y_true)):
-#         true_class = y_true[i]
-#         true_class_idx = list(classes).index(true_class)  # Map class to index (e.g., 1 -> 0, 2 -> 1, 3 -> 2)
-#         true_prob = y_prob[i, true_class_idx]
-#         true_probs.append(true_prob)
-#         binary_labels.append(1)  # Positive instance for true class
-        
-#         # Add negative instances for other classes
-#         for c_idx, c in enumerate(classes):
-#             if c != true_class:
-#                 true_probs.append(y_prob[i, c_idx])
-#                 binary_labels.append(0)
-    
-#     true_probs = np.array(true_probs)
-#     binary_labels = np.array(binary_labels)
-    
-#     # Sort by probabilities in descending order
-#     sorted_indices = np.argsort(true_probs)[::-1]
-#     true_probs_sorted = true_probs[sorted_indices]
-#     binary_labels_sorted = binary_labels[sorted_indices]
-    
-#     # Compute TPR and FPR
-#     tpr = []
-#     fpr = []
-#     tp = 0
-#     fp = 0
-#     pos = np.sum(binary_labels)
-#     neg = len(binary_labels) - pos
-    
-#     for i in range(len(binary_labels)):
-#         if binary_labels_sorted[i] == 1:
-#             tp += 1
-#         else:
-#             fp += 1
-#         tpr.append(tp / pos if pos > 0 else 0)
-#         fpr.append(fp / neg if neg > 0 else 0)
-    
-#     # Compute AUC using trapezoidal rule
-#     auc_roc = 0
-#     for i in range(1, len(fpr)):
-#         auc_roc += (fpr[i] - fpr[i-1]) * (tpr[i] + tpr[i-1]) / 2
-    
-#     return auc_roc
-
-# def calculate_auc_pr_multi(y_true, y_prob):
-#     """
-#     Compute micro-averaged AUC-PR (Area Under Precision-Recall Curve) for a multi-class problem.
-    
-#     Parameters:
-#     y_true (list or np.ndarray): True labels, shape (n_samples,)
-#     y_prob (list or np.ndarray): Predicted probabilities, shape (n_samples, n_classes) or list of lists
-    
-#     Returns:
-#     float: Micro-averaged AUC-PR for the entire dataset
-#     """
-#     y_true = np.array(y_true)
-#     y_prob = np.array(y_prob)  # Handles list of lists input
-    
-#     if y_true.shape[0] != y_prob.shape[0]:
-#         raise ValueError(f"y_true and y_prob must have the same number of samples. "
-#                          f"Got {y_true.shape[0]} for y_true and {y_prob.shape[0]} for y_prob.")
-    
-#     classes = np.unique(y_true)
-#     if not np.all(np.isin(classes, [1, 2, 3])):
-#         raise ValueError(f"Classes must be 1, 2, or 3. Got {classes}.")
-    
-#     if y_prob.shape[1] != len(classes):
-#         raise ValueError(f"y_prob must have probabilities for each class. "
-#                          f"Got {y_prob.shape[1]} columns, but expected {len(classes)} classes.")
-    
-#     # Micro-average: Flatten into a binary classification problem
-#     true_probs = []
-#     binary_labels = []
-    
-#     for i in range(len(y_true)):
-#         true_class = y_true[i]
-#         true_class_idx = list(classes).index(true_class)
-#         true_prob = y_prob[i, true_class_idx]
-#         true_probs.append(true_prob)
-#         binary_labels.append(1)
-        
-#         for c_idx, c in enumerate(classes):
-#             if c != true_class:
-#                 true_probs.append(y_prob[i, c_idx])
-#                 binary_labels.append(0)
-    
-#     true_probs = np.array(true_probs)
-#     binary_labels = np.array(binary_labels)
-    
-#     # Sort by probabilities in descending order
-#     sorted_indices = np.argsort(true_probs)[::-1]
-#     true_probs_sorted = true_probs[sorted_indices]
-#     binary_labels_sorted = binary_labels[sorted_indices]
-    
-#     # Compute precision and recall
-#     precision_vals = []
-#     recall_vals = []
-#     tp = 0
-#     fp = 0
-#     fn = np.sum(binary_labels)
-    
-#     for i in range(len(binary_labels)):
-#         if binary_labels_sorted[i] == 1:
-#             tp += 1
-#             fn -= 1
-#         else:
-#             fp += 1
-#         precision = tp / (tp + fp) if (tp + fp) > 0 else 1.0
-#         recall = tp / (tp + fn) if (tp + fn) > 0 else 0.0
-#         precision_vals.append(precision)
-#         recall_vals.append(recall)
-    
-#     # Compute AUC-PR using trapezoidal rule
-#     auc_pr = 0
-#     for i in range(1, len(recall_vals)):
-#         auc_pr += (recall_vals[i] - recall_vals[i-1]) * (precision_vals[i] + precision_vals[i-1]) / 2
-    
-#     return auc_pr
-
-# def calculate_precision_recall_curve_multi(y_true, y_prob):
-#     """
-#     Compute micro-averaged precision-recall curve for a multi-class problem.
-    
-#     Parameters:
-#     y_true (list or np.ndarray): True labels, shape (n_samples,)
-#     y_prob (list or np.ndarray): Predicted probabilities, shape (n_samples, n_classes) or list of lists
-    
-#     Returns:
-#     list: Precision values for the entire dataset
-#     list: Recall values for the entire dataset
-#     list: Thresholds
-#     """
-#     y_true = np.array(y_true)
-#     y_prob = np.array(y_prob)  # Handles list of lists input
-    
-#     if y_true.shape[0] != y_prob.shape[0]:
-#         raise ValueError(f"y_true and y_prob must have the same number of samples. "
-#                          f"Got {y_true.shape[0]} for y_true and {y_prob.shape[0]} for y_prob.")
-    
-#     classes = np.unique(y_true)
-#     if not np.all(np.isin(classes, [1, 2, 3])):
-#         raise ValueError(f"Classes must be 1, 2, or 3. Got {classes}.")
-    
-#     if y_prob.shape[1] != len(classes):
-#         raise ValueError(f"y_prob must have probabilities for each class. "
-#                          f"Got {y_prob.shape[1]} columns, but expected {len(classes)} classes.")
-    
-#     # Micro-average: Flatten into a binary classification problem
-#     true_probs = []
-#     binary_labels = []
-    
-#     for i in range(len(y_true)):
-#         true_class = y_true[i]
-#         true_class_idx = list(classes).index(true_class)
-#         true_prob = y_prob[i, true_class_idx]
-#         true_probs.append(true_prob)
-#         binary_labels.append(1)
-        
-#         for c_idx, c in enumerate(classes):
-#             if c != true_class:
-#                 true_probs.append(y_prob[i, c_idx])
-#                 binary_labels.append(0)
-    
-#     true_probs = np.array(true_probs)
-#     binary_labels = np.array(binary_labels)
-    
-#     # Sort by probabilities in descending order
-#     sorted_indices = np.argsort(true_probs)[::-1]
-#     true_probs_sorted = true_probs[sorted_indices]
-#     binary_labels_sorted = binary_labels[sorted_indices]
-    
-#     # Compute thresholds
-#     thresholds = np.concatenate([[1.1], true_probs_sorted])
-#     thresholds = np.unique(thresholds)[::-1]
-    
-#     # Compute precision and recall at each threshold
-#     precision_vals = []
-#     recall_vals = []
-#     tp = 0
-#     fp = 0
-#     fn = np.sum(binary_labels)
-    
-#     for thresh in thresholds:
-#         y_pred_binary = (true_probs >= thresh).astype(int)
-#         tp = np.sum((y_pred_binary == 1) & (binary_labels == 1))
-#         fp = np.sum((y_pred_binary == 1) & (binary_labels == 0))
-#         fn = np.sum((y_pred_binary == 0) & (binary_labels == 1))
-        
-#         precision = tp / (tp + fp) if (tp + fp) > 0 else 1.0
-#         recall = tp / (tp + fn) if (tp + fn) > 0 else 0.0
-        
-#         precision_vals.append(precision)
-#         recall_vals.append(recall)
-    
-#     return precision_vals, recall_vals, thresholds
-
-# def calculate_roc_curve_multi(y_true, y_prob):
-#     """
-#     Compute micro-averaged ROC curve for a multi-class problem.
-    
-#     Parameters:
-#     y_true (list or np.ndarray): True labels, shape (n_samples,)
-#     y_prob (list or np.ndarray): Predicted probabilities, shape (n_samples, n_classes) or list of lists
-    
-#     Returns:
-#     list: FPR values for the entire dataset
-#     list: TPR values for the entire dataset
-#     list: Thresholds
-#     """
-#     y_true = np.array(y_true)
-#     y_prob = np.array(y_prob)  # Handles list of lists input
-    
-#     if y_true.shape[0] != y_prob.shape[0]:
-#         raise ValueError(f"y_true and y_prob must have the same number of samples. "
-#                          f"Got {y_true.shape[0]} for y_true and {y_prob.shape[0]} for y_prob.")
-    
-#     classes = np.unique(y_true)
-#     if not np.all(np.isin(classes, [1, 2, 3])):
-#         raise ValueError(f"Classes must be 1, 2, or 3. Got {classes}.")
-    
-#     if y_prob.shape[1] != len(classes):
-#         raise ValueError(f"y_prob must have probabilities for each class. "
-#                          f"Got {y_prob.shape[1]} columns, but expected {len(classes)} classes.")
-    
-#     # Micro-average: Flatten into a binary classification problem
-#     true_probs = []
-#     binary_labels = []
-    
-#     for i in range(len(y_true)):
-#         true_class = y_true[i]
-#         true_class_idx = list(classes).index(true_class)
-#         true_prob = y_prob[i, true_class_idx]
-#         true_probs.append(true_prob)
-#         binary_labels.append(1)
-        
-#         for c_idx, c in enumerate(classes):
-#             if c != true_class:
-#                 true_probs.append(y_prob[i, c_idx])
-#                 binary_labels.append(0)
-    
-#     true_probs = np.array(true_probs)
-#     binary_labels = np.array(binary_labels)
-    
-#     # Sort by probabilities in descending order
-#     sorted_indices = np.argsort(true_probs)[::-1]
-#     true_probs_sorted = true_probs[sorted_indices]
-#     binary_labels_sorted = binary_labels[sorted_indices]
-    
-#     # Compute thresholds
-#     thresholds = np.concatenate([[1.1], true_probs_sorted])
-#     thresholds = np.unique(thresholds)[::-1]
-    
-#     # Compute FPR and TPR
-#     fpr_vals = []
-#     tpr_vals = []
-#     tp = 0
-#     fp = 0
-#     fn = np.sum(binary_labels)
-#     tn = len(binary_labels) - fn
-    
-#     for thresh in thresholds:
-#         y_pred_binary = (true_probs >= thresh).astype(int)
-#         tp = np.sum((y_pred_binary == 1) & (binary_labels == 1))
-#         fp = np.sum((y_pred_binary == 1) & (binary_labels == 0))
-#         fn = np.sum((y_pred_binary == 0) & (binary_labels == 1))
-#         tn = np.sum((y_pred_binary == 0) & (binary_labels == 0))
-        
-#         tpr = tp / (tp + fn) if (tp + fn) > 0 else 0.0
-#         fpr = fp / (fp + tn) if (fp + tn) > 0 else 0.0
-        
-#         tpr_vals.append(tpr)
-#         fpr_vals.append(fpr)
-    
-#     return fpr_vals, tpr_vals, thresholds
-
-# import numpy as np
-
 def calculate_confusion_matrix_multi(y_true, y_pred):
-    """
-    Compute the confusion matrix for a multi-class classification problem with classes 1, 2, and 3.
-    
-    Parameters:
-    y_true (list or np.ndarray): True labels, shape (n_samples,)
-    y_pred (list or np.ndarray): Predicted labels, shape (n_samples,)
-    
-    Returns:
-    list: Confusion matrix as a list of lists, where matrix[i][j] is the number of samples
-          with true label i+1 that were predicted as label j+1 (i, j are 0-based indices).
-    """
-    # Convert inputs to numpy arrays
     y_true = np.array(y_true)
     y_pred = np.array(y_pred)
     
-    # Validate shapes
     if y_true.shape != y_pred.shape:
         raise ValueError(f"y_true and y_pred must have the same shape. "
                          f"Got {y_true.shape} for y_true and {y_pred.shape} for y_pred.")
     
-    # Validate classes
     classes = np.unique(np.concatenate([y_true, y_pred]))
     expected_classes = np.array([1, 2, 3])
     if not np.all(np.isin(classes, expected_classes)):
         raise ValueError(f"Classes must be 1, 2, or 3. Got {classes}.")
     
-    # Ensure all classes are present in the matrix, even if not in y_true or y_pred
     if not np.all(np.isin(expected_classes, classes)):
-        # Add missing classes to ensure 3x3 matrix
         classes = expected_classes
     
-    # Initialize 3x3 confusion matrix (for classes 1, 2, 3)
-    n_classes = len(expected_classes)  # 3
+    n_classes = len(expected_classes)
     conf_matrix = np.zeros((n_classes, n_classes), dtype=int)
     
-    # Fill the confusion matrix
     for true_label, pred_label in zip(y_true, y_pred):
         # Map class labels (1, 2, 3) to indices (0, 1, 2)
-        true_idx = int(true_label) - 1  # e.g., class 1 -> index 0
-        pred_idx = int(pred_label) - 1  # e.g., class 1 -> index 0
+        true_idx = int(true_label) - 1
+        pred_idx = int(pred_label) - 1
         conf_matrix[true_idx, pred_idx] += 1
     
-    # Convert to list of lists
     conf_matrix_list = conf_matrix.tolist()
     return conf_matrix_list
 
 def calculate_accuracy_multi(y_true, y_pred):
-    """
-    Compute macro-averaged accuracy for a multi-class classification problem.
-    
-    Parameters:
-    y_true (list or np.ndarray): True labels, shape (n_samples,)
-    y_pred (list or np.ndarray): Predicted labels, shape (n_samples,)
-    
-    Returns:
-    float: Macro-averaged accuracy
-    """
     y_true = np.array(y_true)
     y_pred = np.array(y_pred)
     
@@ -746,7 +156,6 @@ def calculate_accuracy_multi(y_true, y_pred):
     if not np.all(np.isin(classes, [1, 2, 3])):
         raise ValueError(f"Classes must be 1, 2, or 3. Got {classes}.")
     
-    # Compute per-class accuracy (same as per-class recall in one-vs-rest)
     accuracies = []
     for c in [1, 2, 3]:
         correct = np.sum((y_true == c) & (y_pred == c))
@@ -759,16 +168,6 @@ def calculate_accuracy_multi(y_true, y_pred):
     return macro_accuracy
 
 def calculate_precision_multi(y_true, y_pred):
-    """
-    Compute macro-averaged precision for a multi-class classification problem.
-    
-    Parameters:
-    y_true (list or np.ndarray): True labels, shape (n_samples,)
-    y_pred (list or np.ndarray): Predicted labels, shape (n_samples,)
-    
-    Returns:
-    float: Macro-averaged precision
-    """
     y_true = np.array(y_true)
     y_pred = np.array(y_pred)
     
@@ -780,7 +179,6 @@ def calculate_precision_multi(y_true, y_pred):
     if not np.all(np.isin(classes, [1, 2, 3])):
         raise ValueError(f"Classes must be 1, 2, or 3. Got {classes}.")
     
-    # Compute per-class precision
     precisions = []
     for c in [1, 2, 3]:
         tp = np.sum((y_pred == c) & (y_true == c))
@@ -793,16 +191,6 @@ def calculate_precision_multi(y_true, y_pred):
     return macro_precision
 
 def calculate_recall_multi(y_true, y_pred):
-    """
-    Compute macro-averaged recall for a multi-class classification problem.
-    
-    Parameters:
-    y_true (list or np.ndarray): True labels, shape (n_samples,)
-    y_pred (list or np.ndarray): Predicted labels, shape (n_samples,)
-    
-    Returns:
-    float: Macro-averaged recall
-    """
     y_true = np.array(y_true)
     y_pred = np.array(y_pred)
     
@@ -814,7 +202,6 @@ def calculate_recall_multi(y_true, y_pred):
     if not np.all(np.isin(classes, [1, 2, 3])):
         raise ValueError(f"Classes must be 1, 2, or 3. Got {classes}.")
     
-    # Compute per-class recall
     recalls = []
     for c in [1, 2, 3]:
         tp = np.sum((y_pred == c) & (y_true == c))
@@ -827,17 +214,6 @@ def calculate_recall_multi(y_true, y_pred):
     return macro_recall
 
 def calculate_fscore_multi(y_true, y_pred, beta=1.0):
-    """
-    Compute macro-averaged F-score for a multi-class classification problem.
-    
-    Parameters:
-    y_true (list or np.ndarray): True labels, shape (n_samples,)
-    y_pred (list or np.ndarray): Predicted labels, shape (n_samples,)
-    beta (float): Weight of recall in F-score (default: 1.0 for F1-score)
-    
-    Returns:
-    float: Macro-averaged F-score
-    """
     y_true = np.array(y_true)
     y_pred = np.array(y_pred)
     
@@ -849,7 +225,6 @@ def calculate_fscore_multi(y_true, y_pred, beta=1.0):
     if not np.all(np.isin(classes, [1, 2, 3])):
         raise ValueError(f"Classes must be 1, 2, or 3. Got {classes}.")
     
-    # Compute per-class precision and recall
     fscores = []
     for c in [1, 2, 3]:
         tp = np.sum((y_pred == c) & (y_true == c))
@@ -868,18 +243,8 @@ def calculate_fscore_multi(y_true, y_pred, beta=1.0):
     return macro_fscore
 
 def calculate_auc_roc_multi(y_true, y_prob):
-    """
-    Compute macro-averaged AUC-ROC for a multi-class classification problem.
-    
-    Parameters:
-    y_true (list or np.ndarray): True labels, shape (n_samples,)
-    y_prob (list or np.ndarray): Predicted probabilities, shape (n_samples, n_classes) or list of lists
-    
-    Returns:
-    float: Macro-averaged AUC-ROC
-    """
     y_true = np.array(y_true)
-    y_prob = np.array(y_prob)  # Handles list of lists input
+    y_prob = np.array(y_prob)  
     
     if y_true.shape[0] != y_prob.shape[0]:
         raise ValueError(f"y_true and y_prob must have the same number of samples. "
@@ -893,7 +258,6 @@ def calculate_auc_roc_multi(y_true, y_prob):
         raise ValueError(f"y_prob must have probabilities for each class. "
                          f"Got {y_prob.shape[1]} columns, but expected {len(classes)} classes.")
     
-    # Compute per-class AUC-ROC
     auc_scores = []
     for idx, c in enumerate([1, 2, 3]):
         y_true_binary = (y_true == c).astype(int)
@@ -901,7 +265,6 @@ def calculate_auc_roc_multi(y_true, y_prob):
         
         sorted_indices = np.argsort(y_prob_c)[::-1]
         y_true_sorted = y_true_binary[sorted_indices]
-        y_prob_sorted = y_prob_c[sorted_indices]
         
         tpr = []
         fpr = []
@@ -928,18 +291,8 @@ def calculate_auc_roc_multi(y_true, y_prob):
     return macro_auc
 
 def calculate_auc_pr_multi(y_true, y_prob):
-    """
-    Compute macro-averaged AUC-PR for a multi-class classification problem.
-    
-    Parameters:
-    y_true (list or np.ndarray): True labels, shape (n_samples,)
-    y_prob (list or np.ndarray): Predicted probabilities, shape (n_samples, n_classes) or list of lists
-    
-    Returns:
-    float: Macro-averaged AUC-PR
-    """
     y_true = np.array(y_true)
-    y_prob = np.array(y_prob)  # Handles list of lists input
+    y_prob = np.array(y_prob)
     
     if y_true.shape[0] != y_prob.shape[0]:
         raise ValueError(f"y_true and y_prob must have the same number of samples. "
@@ -953,7 +306,6 @@ def calculate_auc_pr_multi(y_true, y_prob):
         raise ValueError(f"y_prob must have probabilities for each class. "
                          f"Got {y_prob.shape[1]} columns, but expected {len(classes)} classes.")
     
-    # Compute per-class AUC-PR
     auc_pr_scores = []
     for idx, c in enumerate([1, 2, 3]):
         y_true_binary = (y_true == c).astype(int)
@@ -961,7 +313,6 @@ def calculate_auc_pr_multi(y_true, y_prob):
         
         sorted_indices = np.argsort(y_prob_c)[::-1]
         y_true_sorted = y_true_binary[sorted_indices]
-        y_prob_sorted = y_prob_c[sorted_indices]
         
         precision_vals = []
         recall_vals = []
@@ -990,20 +341,8 @@ def calculate_auc_pr_multi(y_true, y_prob):
     return macro_auc_pr
 
 def calculate_precision_recall_curve_multi(y_true, y_prob):
-    """
-    Compute macro-averaged precision-recall curve for a multi-class classification problem.
-    
-    Parameters:
-    y_true (list or np.ndarray): True labels, shape (n_samples,)
-    y_prob (list or np.ndarray): Predicted probabilities, shape (n_samples, n_classes) or list of lists
-    
-    Returns:
-    list: Macro-averaged precision values
-    list: Macro-averaged recall values
-    list: Thresholds (approximated)
-    """
     y_true = np.array(y_true)
-    y_prob = np.array(y_prob)  # Handles list of lists input
+    y_prob = np.array(y_prob)
     
     if y_true.shape[0] != y_prob.shape[0]:
         raise ValueError(f"y_true and y_prob must have the same number of samples. "
@@ -1017,7 +356,6 @@ def calculate_precision_recall_curve_multi(y_true, y_prob):
         raise ValueError(f"y_prob must have probabilities for each class. "
                          f"Got {y_prob.shape[1]} columns, but expected {len(classes)} classes.")
     
-    # Compute per-class precision-recall curves
     all_precisions = []
     all_recalls = []
     all_thresholds = []
@@ -1028,7 +366,6 @@ def calculate_precision_recall_curve_multi(y_true, y_prob):
         
         sorted_indices = np.argsort(y_prob_c)[::-1]
         y_prob_sorted = y_prob_c[sorted_indices]
-        y_true_sorted = y_true_binary[sorted_indices]
         
         thresholds = np.concatenate([[1.1], y_prob_sorted])
         thresholds = np.unique(thresholds)[::-1]
@@ -1068,25 +405,13 @@ def calculate_precision_recall_curve_multi(y_true, y_prob):
     
     avg_precision = np.mean(interpolated_precisions, axis=0)
     avg_recall = recall_points
-    avg_thresholds = np.linspace(0, 1, len(recall_points))  # Simplified
+    avg_thresholds = np.linspace(0, 1, len(recall_points))
     
     return avg_precision, avg_recall, avg_thresholds
 
 def calculate_roc_curve_multi(y_true, y_prob):
-    """
-    Compute macro-averaged ROC curve for a multi-class classification problem.
-    
-    Parameters:
-    y_true (list or np.ndarray): True labels, shape (n_samples,)
-    y_prob (list or np.ndarray): Predicted probabilities, shape (n_samples, n_classes) or list of lists
-    
-    Returns:
-    list: Macro-averaged FPR values
-    list: Macro-averaged TPR values
-    list: Thresholds (approximated)
-    """
     y_true = np.array(y_true)
-    y_prob = np.array(y_prob)  # Handles list of lists input
+    y_prob = np.array(y_prob)
     
     if y_true.shape[0] != y_prob.shape[0]:
         raise ValueError(f"y_true and y_prob must have the same number of samples. "
@@ -1100,7 +425,6 @@ def calculate_roc_curve_multi(y_true, y_prob):
         raise ValueError(f"y_prob must have probabilities for each class. "
                          f"Got {y_prob.shape[1]} columns, but expected {len(classes)} classes.")
     
-    # Compute per-class ROC curves
     all_fprs = []
     all_tprs = []
     all_thresholds = []
@@ -1111,7 +435,6 @@ def calculate_roc_curve_multi(y_true, y_prob):
         
         sorted_indices = np.argsort(y_prob_c)[::-1]
         y_prob_sorted = y_prob_c[sorted_indices]
-        y_true_sorted = y_true_binary[sorted_indices]
         
         thresholds = np.concatenate([[1.1], y_prob_sorted])
         thresholds = np.unique(thresholds)[::-1]
@@ -1153,6 +476,5 @@ def calculate_roc_curve_multi(y_true, y_prob):
     
     avg_tpr = np.mean(interpolated_tprs, axis=0)
     avg_fpr = fpr_points
-    avg_thresholds = np.linspace(0, 1, len(fpr_points))  # Simplified
-    
+    avg_thresholds = np.linspace(0, 1, len(fpr_points)) 
     return avg_fpr, avg_tpr, avg_thresholds
