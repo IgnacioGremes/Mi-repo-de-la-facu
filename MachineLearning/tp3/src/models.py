@@ -1039,3 +1039,23 @@ class NeuralNetwork:
 #         plt.legend()
 #         plt.grid(True)
 #         plt.show()
+
+import torch
+import torch.nn as nn
+import torch.optim as optim
+from torch.utils.data import DataLoader, TensorDataset
+
+# Define the model
+class Net(nn.Module):
+    def __init__(self, input_dim, hidden_dims, output_dim):
+        super(Net, self).__init__()
+        layers = []
+        dims = [input_dim] + hidden_dims
+        for i in range(len(dims) - 1):
+            layers.append(nn.Linear(dims[i], dims[i+1]))
+            layers.append(nn.ReLU())
+        layers.append(nn.Linear(dims[-1], output_dim))
+        self.net = nn.Sequential(*layers)
+
+    def forward(self, x):
+        return self.net(x)
