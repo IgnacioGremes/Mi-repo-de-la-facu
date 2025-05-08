@@ -6,7 +6,7 @@ def train_val_test_split(X, y, train_ratio=0.8, val_ratio=0.1, test_ratio=0.1):
         raise ValueError("train_ratio + val_ratio + test_ratio must sum to approximately 1.0")
     
     n_samples = X.shape[0]
-    # np.random.seed(40)  # Uncomment for reproducibility
+    np.random.seed(40)  # Uncomment for reproducibility
     indices = np.random.permutation(n_samples)
     
     # Calculate split points
