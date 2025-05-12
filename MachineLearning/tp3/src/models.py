@@ -126,7 +126,7 @@ class NeuralNetwork:
     def train(self, X_train, Y_train, X_val, Y_val, epochs, early_stopping=False, patience=10, min_delta=1e-4):
         train_losses, val_losses = [], []
         best_val_loss = float('inf')
-        wait = 0  # For early stopping
+        wait = 0
 
         start_time = time.time()
 
@@ -160,7 +160,6 @@ class NeuralNetwork:
             if epoch % 10 == 0:
                 print(f"Epoch {epoch}: Train Loss = {loss_train:.4f}, Val Loss = {loss_val:.4f}, LR = {self.learning_rate:.6f}")
 
-            # --- EARLY STOPPING BLOCK ---
             if early_stopping:
                 if best_val_loss - loss_val > min_delta:
                     best_val_loss = loss_val
@@ -170,7 +169,6 @@ class NeuralNetwork:
                     if wait >= patience:
                         print(f"\nEarly stopping at epoch {epoch} (no improvement in {patience} epochs).")
                         break
-            # ----------------------------
 
         end_time = time.time()
         print(f"\nTiempo total de entrenamiento: {end_time - start_time:.2f} segundos")
