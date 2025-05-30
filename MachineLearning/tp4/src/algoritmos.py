@@ -52,7 +52,7 @@ def graf_ganancias_decrecientes(X, K_max):
 
     # Graficar el codo
     plt.plot(range(1, K_max + 1), wcss, marker='o')
-    plt.title("Método del Codo")
+    # plt.title("Método del Codo")
     plt.xlabel("Número de Clústeres (K)")
     plt.ylabel("Suma de errores cuadráticos (WCSS)")
     plt.grid(True)
@@ -74,9 +74,9 @@ def graf_clusters(X, K):
     # Plot centroids in black
     plt.scatter(centroids[:, 0], centroids[:, 1], c='black', marker='x', s=100, label='Centroides')
 
-    plt.title('Visualización de Clústeres')
-    plt.xlabel('Feature 1')
-    plt.ylabel('Feature 2')
+    # plt.title('Visualización de Clústeres')
+    plt.xlabel('A')
+    plt.ylabel('B')
     plt.legend()
     plt.grid(True)
     plt.show()
@@ -194,9 +194,29 @@ def graf_ganancias_decrecientes_gmm_distancia(X, K_max):
     plt.plot(range(1, K_max + 1), distancias, marker='o')
     plt.xlabel('Número de Clusters (K)')
     plt.ylabel('Suma de Distancias al Centro (tipo WCSS)')
-    plt.title('Ganancias Decrecientes usando GMM (Distancia a la Media)')
+    # plt.title('Ganancias Decrecientes usando GMM (Distancia a la Media)')
     plt.grid(True)
     plt.show()
+
+def plot_neg_log_likelihood_vs_k(X, k_values):
+    neg_log_likelihoods = []
+
+    for k in range(1, k_values + 1):
+        gmm = GMM(n_components=k)
+        gmm.fit(X)
+        ll = gmm.log_verosimilitud(X)
+        neg_log_likelihoods.append(-ll)  # usamos negativo para visualizar
+
+    # Gráfico
+    plt.figure(figsize=(8, 5))
+    plt.plot(range(1, k_values + 1), neg_log_likelihoods, marker='o')
+    plt.xlabel("Número de componentes (K)")
+    plt.ylabel("- Log-verosimilitud")
+    # plt.title("Evaluación de GMM: -loglikelihood vs. K")
+    plt.grid(True)
+    plt.tight_layout()
+    plt.show()
+
 
 def plot_cluster_GMM(X, gmm):
     gamma = gmm.calcular_responsabilidades(X)
@@ -213,7 +233,7 @@ def plot_cluster_GMM(X, gmm):
     # Plot centroids in black with 'x' marker
     plt.scatter(gmm.mu[:, 0], gmm.mu[:, 1], c='black', marker='x', s=100, label='Centroides')
 
-    plt.title('Clusters GMM y sus Centroides')
+    # plt.title('Clusters GMM y sus Centroides')
     plt.xlabel('A')
     plt.ylabel('B')
     plt.legend()
@@ -276,7 +296,7 @@ def plot_cluster_DBSCAN(X, labels):
             plt.scatter(X[class_members, 0], X[class_members, 1], 
                         color=colors(k), label=f'Cluster {k}', s=40)
     
-    plt.title('DBSCAN Clustering')
+    # plt.title('DBSCAN Clustering')
     plt.xlabel('A')
     plt.ylabel('B')
     plt.legend()
@@ -326,7 +346,21 @@ class PCA_SVD:
         plt.bar(range(1, len(self.S) + 1), self.S)
         plt.xlabel('Index of Singular Value')
         plt.ylabel('Singular Value')
-        plt.title('Singular Values from SVD')
+        # plt.title('Singular Values from SVD')
         plt.grid(True)
         plt.show()
 
+def train_val_split(array, val_ratio=0.2):
+    # np.random.seed(seed)
+
+    n_samples = len(array)
+    indices = np.random.permutation(n_samples)
+
+    split_point = int(n_samples * (1 - val_ratio))
+    train_indices = indices[:split_point]
+    val_indices = indices[split_point:]
+
+    train_array = array[train_indices]
+    val_array = array[val_indices]
+
+    return train_array, val_array
