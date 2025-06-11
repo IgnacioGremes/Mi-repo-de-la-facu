@@ -1,11 +1,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import pandas as pd
 import random
 from scipy.stats import multivariate_normal
 import matplotlib.cm as cm
 from collections import deque
-from scipy.spatial.distance import cdist
 
 def euclidean_distance(a, b):
     return np.linalg.norm(a - b)
@@ -41,7 +39,7 @@ def k_means(X, cant_clust, max_iter=1000, tol=1e-4):
     return np.array(final_assigned_clust), centroids   
 
 def graf_ganancias_decrecientes(X, K_max):
-    wcss = []  # Suma de errores cuadráticos intra-clúster
+    wcss = []
     for k in range(1, K_max + 1):
         labels, centroids = k_means(X, k)
         sum_squared_error = 0
@@ -50,9 +48,7 @@ def graf_ganancias_decrecientes(X, K_max):
             sum_squared_error += euclidean_distance(sample, centroide)**2
         wcss.append(sum_squared_error)
 
-    # Graficar el codo
     plt.plot(range(1, K_max + 1), wcss, marker='o')
-    # plt.title("Método del Codo")
     plt.xlabel("Número de Clústeres (K)")
     plt.ylabel("Suma de errores cuadráticos (WCSS)")
     plt.grid(True)
@@ -61,20 +57,15 @@ def graf_ganancias_decrecientes(X, K_max):
 def graf_clusters(X, K):
     labels, centroids = k_means(X, K)
     
-    # Choose colormap based on K
     cmap = cm.get_cmap('tab20', K) if K <= 20 else cm.get_cmap('nipy_spectral', K)
 
     plt.figure(figsize=(8, 6))
 
-    # Plot each cluster with a distinct color
     for k in range(K):
         puntos = X[labels == k]
         plt.scatter(puntos[:, 0], puntos[:, 1], color=cmap(k), label=f'Clúster {k}', s=40)
 
-    # Plot centroids in black
     plt.scatter(centroids[:, 0], centroids[:, 1], c='black', marker='x', s=100, label='Centroides')
-
-    # plt.title('Visualización de Clústeres')
     plt.xlabel('A')
     plt.ylabel('B')
     plt.legend()
@@ -84,18 +75,15 @@ def graf_clusters(X, K):
 def calcular_responsabilidades(X, pi, mu, Sigma):
     n_samples = X.shape[0]
     K = len(pi)
-    gamma = np.zeros((n_samples, K))  # responsabilidad γ_ik
+    gamma = np.zeros((n_samples, K))
 
     for k in range(K):
-        # Crear objeto distribución gaussiana multivariada
         dist = multivariate_normal(mean=mu[k], cov=Sigma[k])
-        # Calcular f(x_i | mu_k, Sigma_k) para todos los puntos
-        gamma[:, k] = pi[k] * dist.pdf(X)  # vectorizado
+        gamma[:, k] = pi[k] * dist.pdf(X) 
 
-    # Normalizar para que sumen 1 por fila
     gamma /= gamma.sum(axis=1, keepdims=True)
 
-    return gamma  # shape: (n_samples, K)
+    return gamma  
 
 class GMM:
     def __init__(self, n_components, max_iter=100, tol=1e-4):
@@ -194,7 +182,6 @@ def graf_ganancias_decrecientes_gmm_distancia(X, K_max):
     plt.plot(range(1, K_max + 1), distancias, marker='o')
     plt.xlabel('Número de Clusters (K)')
     plt.ylabel('Suma de Distancias al Centro (tipo WCSS)')
-    # plt.title('Ganancias Decrecientes usando GMM (Distancia a la Media)')
     plt.grid(True)
     plt.show()
 
@@ -205,14 +192,12 @@ def plot_neg_log_likelihood_vs_k(X, k_values):
         gmm = GMM(n_components=k)
         gmm.fit(X)
         ll = gmm.log_verosimilitud(X)
-        neg_log_likelihoods.append(-ll)  # usamos negativo para visualizar
+        neg_log_likelihoods.append(-ll)
 
-    # Gráfico
     plt.figure(figsize=(8, 5))
     plt.plot(range(1, k_values + 1), neg_log_likelihoods, marker='o')
     plt.xlabel("Número de componentes (K)")
     plt.ylabel("- Log-verosimilitud")
-    # plt.title("Evaluación de GMM: -loglikelihood vs. K")
     plt.grid(True)
     plt.tight_layout()
     plt.show()
@@ -230,10 +215,7 @@ def plot_cluster_GMM(X, gmm):
         puntos_k = X[asignaciones == k]
         plt.scatter(puntos_k[:, 0], puntos_k[:, 1], color=cmap(k), label=f'Cluster {k}', s=40)
 
-    # Plot centroids in black with 'x' marker
     plt.scatter(gmm.mu[:, 0], gmm.mu[:, 1], c='black', marker='x', s=100, label='Centroides')
-
-    # plt.title('Clusters GMM y sus Centroides')
     plt.xlabel('A')
     plt.ylabel('B')
     plt.legend()
@@ -242,12 +224,11 @@ def plot_cluster_GMM(X, gmm):
 
 def dbscan(X, eps=0.5, min_samples=5):
     n_samples = len(X)
-    labels = np.full(n_samples, -1)  # -1 representa "ruido"
+    labels = np.full(n_samples, -1)
     visited = np.zeros(n_samples, dtype=bool)
     cluster_id = 0
 
     def region_query(i):
-        # Devuelve índices de puntos dentro del radio eps del punto i
         distances = np.linalg.norm(X - X[i], axis=1)
         return np.where(distances <= eps)[0]
 
@@ -258,7 +239,7 @@ def dbscan(X, eps=0.5, min_samples=5):
 
         vecinos = region_query(i)
         if len(vecinos) < min_samples:
-            labels[i] = -1  # ruido
+            labels[i] = -1
         else:
             labels[i] = cluster_id
             cola = deque(vecinos)
@@ -270,9 +251,7 @@ def dbscan(X, eps=0.5, min_samples=5):
                     if len(vecinos_j) >= min_samples:
                         cola.extend(vecinos_j)
                 if labels[j] == -1:
-                    labels[j] = cluster_id  # anteriormente ruido, ahora parte del clúster
-                if labels[j] == -1 or labels[j] == -2:
-                    labels[j] = cluster_id
+                    labels[j] = cluster_id 
             cluster_id += 1
 
     return labels
@@ -280,23 +259,21 @@ def dbscan(X, eps=0.5, min_samples=5):
 
 def plot_cluster_DBSCAN(X, labels):
     unique_labels = set(labels)
-    K = len(unique_labels - {-1})  # number of clusters (excluding noise)
+    K = len(unique_labels - {-1}) 
 
-    colors = cm.get_cmap('tab20', K)  # enough unique colors
+    colors = cm.get_cmap('tab20', K) 
 
     plt.figure(figsize=(8, 6))
     
     for k in unique_labels:
         class_members = labels == k
         if k == -1:
-            # Noise points in black
             plt.scatter(X[class_members, 0], X[class_members, 1], c='black', label='Noise', s=40)
         else:
-            # Cluster points with distinct color
             plt.scatter(X[class_members, 0], X[class_members, 1], 
                         color=colors(k), label=f'Cluster {k}', s=40)
     
-    # plt.title('DBSCAN Clustering')
+
     plt.xlabel('A')
     plt.ylabel('B')
     plt.legend()
@@ -308,8 +285,7 @@ class PCA_SVD:
         self.n_components = n_components
         self.components = None
         self.mean = None
-        self.S = None  # Store singular values (optional)
-
+        self.S = None  
     def _ensure_numpy(self, X):
         return np.asarray(X)
 
@@ -319,7 +295,7 @@ class PCA_SVD:
         X_centered = X - self.mean
         U, S, Vt = np.linalg.svd(X_centered, full_matrices=False)
         self.components = Vt[:self.n_components]
-        self.S = S  # Save for optional use (e.g., plotting)
+        self.S = S  
 
     def transform(self, X):
         X = self._ensure_numpy(X)
@@ -344,23 +320,7 @@ class PCA_SVD:
             raise RuntimeError("You must call fit() before plotting singular values.")
         plt.figure(figsize=(8, 5))
         plt.bar(range(1, len(self.S) + 1), self.S)
-        plt.xlabel('Index of Singular Value')
-        plt.ylabel('Singular Value')
-        # plt.title('Singular Values from SVD')
+        plt.xlabel('Index of Singular Value', fontsize=14)
+        plt.ylabel('Singular Value', fontsize=14)
         plt.grid(True)
         plt.show()
-
-def train_val_split(array, val_ratio=0.2):
-    # np.random.seed(seed)
-
-    n_samples = len(array)
-    indices = np.random.permutation(n_samples)
-
-    split_point = int(n_samples * (1 - val_ratio))
-    train_indices = indices[:split_point]
-    val_indices = indices[split_point:]
-
-    train_array = array[train_indices]
-    val_array = array[val_indices]
-
-    return train_array, val_array
