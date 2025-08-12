@@ -1,18 +1,18 @@
 services:
-# Servicio para PostgreSQL
-postgres:
-build:
-context: .
-dockerfile: Dockerfile
-image: postgres:17.2-alpine
-container_name: servidor_postgresql
-restart: no # Para que no se relance al reiniciar (sino: 'always')
-environment:
-POSTGRES_DB: base_tp0
-POSTGRES_USER: admin
-POSTGRES_PASSWORD: admin123
-ports:
-- "5440:5432"
-volumes:
-- ./data/postgres:/var/lib/postgresql/data
-- ./data/tmp:/tmp
+  # Servicio para PostgreSQL
+  postgres:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: postgres:17.2-alpine
+    container_name: servidor_postgresql
+    restart: "no" # Para que no se relance al reiniciar (sino: 'always')
+    environment:
+      POSTGRES_DB: base_tp0
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin123
+    ports:
+      - "5440:5432"
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+      - ./data/tmp:/tmp
